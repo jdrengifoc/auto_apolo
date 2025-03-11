@@ -22,4 +22,3 @@ LOG_FILE="cleanup.log"
 echo "$(date) - Deleted all subdirectories in $PROYECTO_DIR" >> "$LOG_FILE"
 
 echo "✅ All subdirectories inside '$PROYECTO_DIR' have been deleted."
-EOF
