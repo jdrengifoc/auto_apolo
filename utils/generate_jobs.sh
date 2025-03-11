@@ -10,6 +10,7 @@ PROYECTO_DIR="$1"
 if [ ! -d "$PROYECTO_DIR" ]; then
     echo "ERROR: La carpeta '$PROYECTO_DIR' no existe."
     exit 1
+fi
 
 
 # Find the first `.config` and `.R` files in the project folder.
