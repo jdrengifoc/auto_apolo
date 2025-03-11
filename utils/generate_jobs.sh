@@ -1,22 +1,30 @@
 #!/bin/bash
 
-# Verifica que se proporcione un argumento
+# Verify that the project directory is passed as an argument
 if [ "$#" -ne 1 ]; then
     echo "Uso: $0 <ruta_al_proyecto>"
     exit 1
 fi
-
 PROYECTO_DIR="$1"
-CONFIG_FILE="$PROYECTO_DIR/params.config"
-TEMPLATE_R="$PROYECTO_DIR/main_template.R"
+# Verify that the folder exists
+if [ ! -d "$PROYECTO_DIR" ]; then
+    echo "ERROR: La carpeta '$PROYECTO_DIR' no existe."
+    exit 1
 
-# Verifica que existan los archivos necesarios
-if [ ! -f "$CONFIG_FILE" ] || [ ! -f "$TEMPLATE_R" ]; then
-    echo "ERROR: No se encontraron params.config o main_template.R en $PROYECTO_DIR"
+
+# Find the first `.config` and `.R` files in the project folder.
+CONFIG_FILE=$(find "$PROYECTO_DIR" -maxdepth 1 -type f -name "*.config" | head -n 1)
+TEMPLATE_R=$(find "$PROYECTO_DIR" -maxdepth 1 -type f -name "*.R" | head -n 1)
+
+# Check if files were found.
+if [ -z "$CONFIG_FILE" ] || [ -z "$TEMPLATE_R" ]; then
+    echo "ERROR: No se encontró un archivo .config o .R en $PROYECTO_DIR"
     exit 1
 fi
+echo "CONFIG_FILE encontrado: $CONFIG_FILE"
+echo "TEMPLATE_R encontrado: $TEMPLATE_R"
 
-# Carga los parámetros desde el archivo de configuración
+# Load the parameters from the configuration file.
 source "$CONFIG_FILE"
 
 # Crea las carpetas si no existen
