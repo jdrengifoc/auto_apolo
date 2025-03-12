@@ -22,8 +22,8 @@ if [ -z "$CONFIG_FILE" ] || [ -z "$TEMPLATE_R" ]; then
     echo "ERROR: No se encontró un archivo .config o .R en $PROYECTO_DIR"
     exit 1
 fi
-echo "CONFIG_FILE encontrado: $CONFIG_FILE"
-echo "TEMPLATE_R encontrado: $TEMPLATE_R"
+echo "✅ CONFIG_FILE encontrado: $CONFIG_FILE"
+echo "✅ TEMPLATE_R encontrado: $TEMPLATE_R"
 
 # Load the parameters from the configuration file.
 source "$CONFIG_FILE"
@@ -32,9 +32,8 @@ source "$CONFIG_FILE"
 mkdir -p "$PROYECTO_DIR/$aa_JOBS_folder"
 mkdir -p "$PROYECTO_DIR/$aa_LOGS_folder"
 
-# Convierte los arrays declarados en el .config a variables locales
-PARAM1_LIST=("${aa_param1[@]}")
-PARAM2_LIST=("${aa_param2[@]}")
+# Generate parameter combinations.
+COMBINATIONS=$(bash generate_combinations.sh "$CONFIG_FILE")
 
 # Verifica si hay valores en los arrays
 if [ ${#PARAM1_LIST[@]} -eq 0 ] || [ ${#PARAM2_LIST[@]} -eq 0 ]; then
@@ -71,7 +70,7 @@ EOF
             # Genera el script R reemplazando los valores
             sed "s/__param1__/$p1/g; s/__param2__/$p2/g" "$TEMPLATE_R" > "$R_FILE"
 
-            echo "Generado: $JOB_FILE y $R_FILE"
+            echo "✅ Generado: $JOB_FILE y $R_FILE"
         done
     done
 else
@@ -104,6 +103,6 @@ EOF
         # Genera el script R reemplazando los valores
         sed "s/__param1__/$p1/g; s/__param2__/$p2/g" "$TEMPLATE_R" > "$R_FILE"
 
-        echo "Generado: $JOB_FILE y $R_FILE"
+        echo "✅ Generado: $JOB_FILE y $R_FILE"
     done
 fi
