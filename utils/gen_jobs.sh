@@ -41,6 +41,8 @@ if [ ${#COMBINACIONES[@]} -eq 0 ]; then
     exit 1
 fi
 
+PARAM_KEYS=($(echo "${!aa_PARAMS[@]}" | tr ' ' '\n' | sort))
+
 # Genera los scripts de trabajo
 for combo in "${COMBINACIONES[@]}"; do
     IFS=',' read -r -a valores <<< "$combo"
