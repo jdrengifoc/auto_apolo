@@ -41,7 +41,7 @@ if [ ${#COMBINACIONES[@]} -eq 0 ]; then
     exit 1
 fi
 
-PARAM_KEYS=($(echo "${!aa_PARAMS[@]}" | tr ' ' '\n' | sort))
+param_names=($(echo "${!aa_PARAMS[@]}" | tr ' ' '\n' | sort))
 
 # Genera los scripts de trabajo
 for combo in "${COMBINACIONES[@]}"; do
@@ -49,8 +49,8 @@ for combo in "${COMBINACIONES[@]}"; do
 
     # Build file name using parameter names
     filename=""
-    for ((j=0; j<${#PARAM_KEYS[@]}; j++)); do
-        filename+="${PARAM_KEYS[j]}=${values[j]}_"
+    for ((j=0; j<${#param_names[@]}; j++)); do
+        filename+="${param_names[j]}=${values[j]}_"
     done
     filename="${filename%_}"  # Remove trailing underscore
 
@@ -78,7 +78,7 @@ EOF
     # Genera el script R reemplazando los valores en la plantilla
     R_CONTENT=$(<"$TEMPLATE_R")
     for ((i=0; i<${#values[@]}; i++)); do
-        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__param$((i+1))__/${values[i]}/g")
+        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__${param_names[j]}__/${values[i]}/g")
     done
     echo "$R_CONTENT" > "$R_FILE"
     
