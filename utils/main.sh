@@ -14,7 +14,6 @@ if [ ! -d "$PROYECTO_DIR" ]; then
     exit 1
 fi
 
-# Find and delete all directories inside the given project directory
-find "$PROYECTO_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
-
-echo "✅ All subdirectories inside '$PROYECTO_DIR' have been deleted."
+bash "$(dirname "$0")/clean_job_folder.sh" "$PROYECTO_DIR"
+bash "$(dirname "$0")/gen_jobs.sh" "$PROYECTO_DIR"
+bash "$(dirname "$0")/run_jobs.sh" "$PROYECTO_DIR"
