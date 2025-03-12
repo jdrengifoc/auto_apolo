@@ -32,74 +32,45 @@ source "$CONFIG_FILE"
 mkdir -p "$PROYECTO_DIR/$aa_JOBS_folder"
 mkdir -p "$PROYECTO_DIR/$aa_LOGS_folder"
 
-# Verifica si hay valores en los arrays
-if [ ${#PARAM1_LIST[@]} -eq 0 ] || [ ${#PARAM2_LIST[@]} -eq 0 ]; then
-  echo "Error: Los parámetros están vacíos"
-  exit 1
+# Genera las combinaciones de parámetros usando el script externo
+COMBINACIONES=($(./utils/gen_params_combinations.sh "$PROYECTO_DIR"))
+
+# Verifica si se generaron combinaciones
+if [ ${#COMBINACIONES[@]} -eq 0 ]; then
+    echo "ERROR: No se generaron combinaciones de parámetros."
+    exit 1
 fi
 
-# Genera los jobs dependiendo del modo
-if [ "$aa_USE_ALL_COMBINATIONS" = true ]; then
-    # Genera todas las combinaciones posibles de PARAM1 y PARAM2
-    for p1 in "${PARAM1_LIST[@]}"; do
-        for p2 in "${PARAM2_LIST[@]}"; do
-            JOB_FILE="$PROYECTO_DIR/$aa_JOBS_folder/job_${p1}_${p2}.sh"
-            R_FILE="$PROYECTO_DIR/$aa_JOBS_folder/main_${p1}_${p2}.R"
+# Genera los scripts de trabajo
+for combo in "${COMBINACIONES[@]}"; do
+    IFS=',' read -r -a valores <<< "$combo"
+    JOB_FILE="$PROYECTO_DIR/$aa_JOBS_folder/job_${combo//,/}.sh"
+    R_FILE="$PROYECTO_DIR/$aa_JOBS_folder/main_${combo//,/}.R"
 
-            # Genera el script SLURM
-            cat > "$JOB_FILE" <<EOF
+    # Genera el script SLURM
+    cat > "$JOB_FILE" <<EOF
 #!/bin/bash
 #SBATCH --partition=$aa_PARTITION
 #SBATCH --nodes=$aa_NODES
 #SBATCH --ntasks=$aa_TASKS
 #SBATCH --time=$aa_TIME
-#SBATCH --job-name=job_${p1}_${p2}
-#SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${p1}_${p2}.out
-#SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${p1}_${p2}.err
+#SBATCH --job-name=job_${combo//,/}
+#SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${combo//,/}.out
+#SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${combo//,/}.err
 
 module load $aa_PYTHON_MODULE
 source activate $aa_CONDA_ENV
 
 Rscript $R_FILE
 EOF
-            chmod +x "$JOB_FILE"
+    chmod +x "$JOB_FILE"
 
-            # Genera el script R reemplazando los valores
-            sed "s/__param1__/$p1/g; s/__param2__/$p2/g" "$TEMPLATE_R" > "$R_FILE"
-
-            echo "✅ Generado: $JOB_FILE y $R_FILE"
-        done
+    # Genera el script R reemplazando los valores en la plantilla
+    R_CONTENT=$(<"$TEMPLATE_R")
+    for ((i=0; i<${#valores[@]}; i++)); do
+        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__param$((i+1))__/${valores[i]}/g")
     done
-else
-    # Genera solo pares ordenados (índices coincidentes)
-    for ((i=0; i<${#PARAM1_LIST[@]}; i++)); do
-        p1="${PARAM1_LIST[i]}"
-        p2="${PARAM2_LIST[i]}"
-
-        JOB_FILE="$PROYECTO_DIR/$aa_JOBS_folder/job_${p1}_${p2}.sh"
-        R_FILE="$PROYECTO_DIR/$aa_JOBS_folder/main_${p1}_${p2}.R"
-
-        # Genera el script SLURM
-        cat > "$JOB_FILE" <<EOF
-#!/bin/bash
-#SBATCH --partition=$aa_PARTITION
-#SBATCH --nodes=$aa_NODES
-#SBATCH --ntasks=$aa_TASKS
-#SBATCH --time=$aa_TIME
-#SBATCH --job-name=job_${p1}_${p2}
-#SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${p1}_${p2}.out
-#SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${p1}_${p2}.err
-
-module load $aa_PYTHON_MODULE
-source activate $aa_CONDA_ENV
-
-Rscript $R_FILE
-EOF
-        chmod +x "$JOB_FILE"
-
-        # Genera el script R reemplazando los valores
-        sed "s/__param1__/$p1/g; s/__param2__/$p2/g" "$TEMPLATE_R" > "$R_FILE"
-
-        echo "✅ Generado: $JOB_FILE y $R_FILE"
-    done
-fi
+    echo "$R_CONTENT" > "$R_FILE"
+    
+    echo "✅ Generado: $JOB_FILE y $R_FILE"
+done
