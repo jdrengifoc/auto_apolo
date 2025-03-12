@@ -44,6 +44,14 @@ fi
 # Genera los scripts de trabajo
 for combo in "${COMBINACIONES[@]}"; do
     IFS=',' read -r -a valores <<< "$combo"
+
+    # Build file name using parameter names
+    filename=""
+    for ((j=0; j<${#PARAM_KEYS[@]}; j++)); do
+        filename+="${PARAM_KEYS[j]}=${values[j]}_"
+    done
+    filename="${filename%_}"  # Remove trailing underscore
+
     JOB_FILE="$PROYECTO_DIR/$aa_JOBS_folder/job_${combo//,/}.sh"
     R_FILE="$PROYECTO_DIR/$aa_JOBS_folder/main_${combo//,/}.R"
 
