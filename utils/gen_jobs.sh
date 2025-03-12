@@ -52,8 +52,8 @@ for combo in "${COMBINACIONES[@]}"; do
     done
     filename="${filename%_}"  # Remove trailing underscore
 
-    JOB_FILE="$PROYECTO_DIR/$aa_JOBS_folder/job_${combo//,/}.sh"
-    R_FILE="$PROYECTO_DIR/$aa_JOBS_folder/main_${combo//,/}.R"
+    JOB_FILE="$PROYECTO_DIR/$aa_JOBS_folder/job_${filename}.sh"
+    R_FILE="$PROYECTO_DIR/$aa_JOBS_folder/main_${filename}.R"
 
     # Genera el script SLURM
     cat > "$JOB_FILE" <<EOF
