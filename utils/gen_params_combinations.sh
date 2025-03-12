@@ -14,7 +14,8 @@ if [ ! -d "$PROYECTO_DIR" ]; then
     exit 1
 fi
 
-CONFIG_FILE="$PROYECTO_DIR/params.config"
+# Find the first `.config` and `.R` files in the project folder.
+CONFIG_FILE=$(find "$PROYECTO_DIR" -maxdepth 1 -type f -name "*.config" | head -n 1)
 
 # Verify that the config file exists
 if [ ! -f "$CONFIG_FILE" ]; then

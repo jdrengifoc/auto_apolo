@@ -64,9 +64,9 @@ for combo in "${COMBINACIONES[@]}"; do
 #SBATCH --nodes=$aa_NODES
 #SBATCH --ntasks=$aa_TASKS
 #SBATCH --time=$aa_TIME
-#SBATCH --job-name=job_${combo//,/}
-#SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${combo//,/}.out
-#SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${combo//,/}.err
+#SBATCH --job-name=job_${filename}
+#SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${filename}.out
+#SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${filename}.err
 
 module load $aa_PYTHON_MODULE
 source activate $aa_CONDA_ENV
