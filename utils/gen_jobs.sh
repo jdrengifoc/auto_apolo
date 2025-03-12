@@ -45,11 +45,10 @@ PARAM_KEYS=($(echo "${!aa_PARAMS[@]}" | tr ' ' '\n' | sort))
 
 # Genera los scripts de trabajo
 for combo in "${COMBINACIONES[@]}"; do
-    IFS=',' read -r -a valores <<< "$combo"
+    IFS=',' read -r -a values <<< "$combo"
 
     # Build file name using parameter names
     filename=""
-    values=($combo)
     for ((j=0; j<${#PARAM_KEYS[@]}; j++)); do
         filename+="${PARAM_KEYS[j]}=${values[j]}_"
     done
@@ -78,8 +77,8 @@ EOF
 
     # Genera el script R reemplazando los valores en la plantilla
     R_CONTENT=$(<"$TEMPLATE_R")
-    for ((i=0; i<${#valores[@]}; i++)); do
-        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__param$((i+1))__/${valores[i]}/g")
+    for ((i=0; i<${#values[@]}; i++)); do
+        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__param$((i+1))__/${values[i]}/g")
     done
     echo "$R_CONTENT" > "$R_FILE"
     
