@@ -78,7 +78,7 @@ EOF
     # Genera el script R reemplazando los valores en la plantilla
     R_CONTENT=$(<"$TEMPLATE_R")
     for ((i=0; i<${#values[@]}; i++)); do
-        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__${param_names[j]}__/${values[i]}/g")
+        R_CONTENT=$(echo "$R_CONTENT" | sed "s/__${param_names[i]}__/${values[i]}/g")
     done
     echo "$R_CONTENT" > "$R_FILE"
     
