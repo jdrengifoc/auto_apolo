@@ -49,6 +49,7 @@ for combo in "${COMBINACIONES[@]}"; do
 
     # Build file name using parameter names
     filename=""
+    values=($COMBINACION)
     for ((j=0; j<${#PARAM_KEYS[@]}; j++)); do
         filename+="${PARAM_KEYS[j]}=${values[j]}_"
     done
