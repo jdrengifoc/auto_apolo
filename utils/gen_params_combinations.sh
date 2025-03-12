@@ -1,48 +1,74 @@
 #!/bin/bash
 
-# Ensure correct usage
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <param_dict> <use_all_combinations>"
+# Verify that the project directory is passed as an argument
+if [ "$#" -ne 1 ]; then
+    echo "Uso: $0 <ruta_al_proyecto>"
     exit 1
 fi
 
-declare -A ff_PARAMS
-eval "declare -A PARAMS="${1#*=}
+PROYECTO_DIR="$1"
 
-ff_USE_ALL_COMBINATIONS="$2"
-ff_COMBINATIONS=()
+# Verify that the folder exists
+if [ ! -d "$PROYECTO_DIR" ]; then
+    echo "ERROR: La carpeta '$PROYECTO_DIR' no existe."
+    exit 1
+fi
 
-if [ "$ff_USE_ALL_COMBINATIONS" == "TRUE" ]; then
-    # Extract param names
-    PARAM_KEYS=("${!ff_PARAMS[@]}")
-    NUM_PARAMS=${#PARAM_KEYS[@]}
+CONFIG_FILE="$PROYECTO_DIR/params.config"
 
-    # Recursive function to generate Cartesian product
+# Verify that the config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "ERROR: El archivo de configuración '$CONFIG_FILE' no existe."
+    exit 1
+fi
+
+# Load configuration
+source "$CONFIG_FILE"
+
+COMBINATIONS=()
+PARAM_KEYS=("${!aa_PARAMS[@]}")
+NUM_PARAMS=${#PARAM_KEYS[@]}
+
+if [ "$aa_USE_ALL_COMBINATIONS" = true ]; then
+    # Generate full Cartesian product
     cartesian_product() {
         local depth="$1"
         local current="$2"
 
         if [ "$depth" -eq "$NUM_PARAMS" ]; then
-            ff_COMBINATIONS+=("$current")
+            COMBINATIONS+=("${current:1}")  # Remove leading comma
             return
         fi
 
         local param="${PARAM_KEYS[depth]}"
-        for value in ${ff_PARAMS[$param]}; do
+        for value in ${aa_PARAMS[$param]}; do
             cartesian_product "$((depth + 1))" "$current,$value"
         done
     }
 
     cartesian_product 0 ""
 else
-    # Use ntuples as they are
+    # Generate ntuple combinations (one per index)
     local IFS=$'\n'
-    for tuple in ${ff_PARAMS[@]}; do
-        ff_COMBINATIONS+=("$tuple")
+    param_values=()
+
+    for param in "${PARAM_KEYS[@]}"; do
+        param_values+=("${aa_PARAMS[$param]}")
+    done
+
+    num_values=$(wc -w <<< "${aa_PARAMS[${PARAM_KEYS[0]}]}")
+
+    for ((i = 0; i < num_values; i++)); do
+        tuple=""
+        for param in "${PARAM_KEYS[@]}"; do
+            values=(${aa_PARAMS[$param]})
+            tuple+="${values[i]},"
+        done
+        COMBINATIONS+=("${tuple%,}") # Remove trailing comma
     done
 fi
 
 # Print results
-for combo in "${ff_COMBINATIONS[@]}"; do
+for combo in "${COMBINATIONS[@]}"; do
     echo "$combo"
 done
