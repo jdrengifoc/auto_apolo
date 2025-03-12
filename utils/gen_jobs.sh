@@ -32,9 +32,6 @@ source "$CONFIG_FILE"
 mkdir -p "$PROYECTO_DIR/$aa_JOBS_folder"
 mkdir -p "$PROYECTO_DIR/$aa_LOGS_folder"
 
-# Generate parameter combinations.
-COMBINATIONS=$(bash generate_combinations.sh "$CONFIG_FILE")
-
 # Verifica si hay valores en los arrays
 if [ ${#PARAM1_LIST[@]} -eq 0 ] || [ ${#PARAM2_LIST[@]} -eq 0 ]; then
   echo "Error: Los parámetros están vacíos"
