@@ -68,10 +68,12 @@ for combo in "${COMBINACIONES[@]}"; do
 #SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${filename}.out
 #SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${filename}.err
 
+echo "$(date): Cargando módulo $aa_PYTHON_MODULE"
 module load $aa_PYTHON_MODULE
+echo "$(date): activando venv $aa_CONDA_ENV"
 source activate $aa_CONDA_ENV
 
-echo "Ejecutando: Rscript $R_FILE"
+echo "$(date): Ejecutando Rscript $R_FILE"
 Rscript $R_FILE
 EOF
     chmod +x "$JOB_FILE"
