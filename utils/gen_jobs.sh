@@ -71,6 +71,7 @@ for combo in "${COMBINACIONES[@]}"; do
 module load $aa_PYTHON_MODULE
 source activate $aa_CONDA_ENV
 
+echo "Ejecutando: Rscript $R_FILE"
 Rscript $R_FILE
 EOF
     chmod +x "$JOB_FILE"
