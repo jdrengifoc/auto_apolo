@@ -293,8 +293,8 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   print(sim_model)
 
   print(toy_prior)
-  
-  while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {)
+
+  while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {
     chunk_AR <- ABC_rejection(model = sim_model,
                               prior = toy_prior,
                               nb_simul = chunk_size_AR,
