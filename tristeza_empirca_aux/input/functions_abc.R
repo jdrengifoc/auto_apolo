@@ -290,10 +290,6 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   cat("Starting Accept-Reject ABC (AR) simulation...\n")
   start_time_AR <- Sys.time()
 
-  print(sim_model)
-
-  print(toy_prior)
-
   while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {
     chunk_AR <- ABC_rejection(model = sim_model,
                               prior = toy_prior,

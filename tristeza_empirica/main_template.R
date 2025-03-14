@@ -14,7 +14,7 @@ source(file.path(FOLDER_INTPUT, "functions_abc.R"))
 app_name <- "__app_name__"
 formula_list <- list(
   swissRailWays = formula(
-    y ~ LNQ2 + LNQ3 + LNNET + LNSTOPS + LNPK + LNPL +
+    y ~ LNQ2 + LNQ3 + LNNET + LNSTOP + LNPK + LNPL +
       YEAR_86 + YEAR_87 + YEAR_88 + YEAR_89 + YEAR_90 +
       YEAR_91 + YEAR_92 + YEAR_93 + YEAR_94 + YEAR_95 +
       YEAR_96 + YEAR_97
@@ -37,7 +37,7 @@ formula_list <- list(
       year_95 + year_96
   ),
   indonesianRice = formula(
-    y ~ seed + urea + labour + land + DP + DV1 + DV2 + DSS
+    y ~ l_seed + l_urea + l_labour + l_land + DP + DV1 + DV2 + DSS
   )
 )
 
