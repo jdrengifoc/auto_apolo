@@ -289,14 +289,28 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   # 9. Run Accept/Reject ABC (AR) in chunks using EasyABC's ABC_rejection
   cat("Starting Accept-Reject ABC (AR) simulation...\n")
   start_time_AR <- Sys.time()
-  while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {
+
+  print(sim_model)
+
+  print(toy_prior)
+  
+  while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {)
     chunk_AR <- ABC_rejection(model = sim_model,
                               prior = toy_prior,
                               nb_simul = chunk_size_AR,
                               summary_stat_target = sum_stat_obs,
                               tol = tol,
                               progress_bar = FALSE)
+
+    cat("Chunk AR completed\n")
+    print(chunk_AR)
+    cat("results_AR\n")
+    print(results_AR)
+    cat("Chunk AR stored\n")
+    print(chunk_AR$param)
     results_AR[[length(results_AR) + 1]] <- chunk_AR$param
+    cat("Chunk AR stored\n")
+    print(results_AR)
     elapsed_AR <- as.numeric(difftime(Sys.time(), start_time_AR, units = "secs"))
     cat("AR chunk completed. Elapsed time:", round(elapsed_AR, 1), "seconds\n")
   }

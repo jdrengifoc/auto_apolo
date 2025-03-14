@@ -67,6 +67,8 @@ for combo in "${COMBINACIONES[@]}"; do
 #SBATCH --job-name=job_${filename}
 #SBATCH --output=$PROYECTO_DIR/$aa_LOGS_folder/job_${filename}.out
 #SBATCH --error=$PROYECTO_DIR/$aa_LOGS_folder/job_${filename}.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=$aa_EMAIL
 
 echo "$(date): Cargando módulo $aa_PYTHON_MODULE"
 module load $aa_PYTHON_MODULE
