@@ -298,15 +298,7 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
                               tol = tol,
                               progress_bar = TRUE)
 
-    cat("Chunk AR completed\n")
-    print(chunk_AR)
-    cat("results_AR\n")
-    print(results_AR)
-    cat("Chunk AR stored\n")
-    print(chunk_AR$param)
     results_AR[[length(results_AR) + 1]] <- chunk_AR$param
-    cat("Chunk AR stored\n")
-    print(results_AR)
     elapsed_AR <- as.numeric(difftime(Sys.time(), start_time_AR, units = "secs"))
     cat("AR chunk completed. Elapsed time:", round(elapsed_AR, 1), "seconds\n")
   }

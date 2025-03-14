@@ -80,7 +80,7 @@ model_type_list <- list(swissRailWays = 'cost',
 
 run_ABC_pipeline(
   app_name, data_path, formula_list, prior_list, model_type_list,
-  time_limit_minutes = 900, tol = 0.001, 
-  chunk_size_AR = 500, chunk_size_MCMC = 500, chunk_size_SMC = 1000
+  time_limit_minutes = 900, tol = 0.01, 
+  chunk_size_AR = 1e4, chunk_size_MCMC = 1e4, chunk_size_SMC = 1e4
   ) 
 
