@@ -11,7 +11,7 @@ data_path <- file.path(FOLDER_INTPUT, "BK_empiricalData_new.RData")
 # functions_abc.R should define get_Ti, SumStatOLS, get_SFpanelEasyABC, etc.
 source(file.path(FOLDER_INTPUT, "functions_abc.R"))
 
-app_name <- __app_name__
+app_name <- "__app_name__"
 formula_list <- list(
   swissRailWays = formula(
     y ~ LNQ2 + LNQ3 + LNNET + LNSTOPS + LNPK + LNPL +
