@@ -1,9 +1,9 @@
 # Pipeline for Running ABC on Multiple Applications
 # MainIntegration_EasyABC_Pipeline.R
-
+print(getwd())
 # Set your working directory (adjust the path as needed)
 FOLDER_OUTPUT <- "auto_apolo/tristeza_empirca_aux/output"
-FOLDER_INTPUT <- "auto_apolo/tristeza_empirca_aux/output"
+FOLDER_INTPUT <- "auto_apolo/tristeza_empirca_aux/input"
 data_path <- file.path(FOLDER_INTPUT, "BK_empiricalData_new.RData")
 
 
