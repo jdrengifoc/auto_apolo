@@ -2,8 +2,8 @@
 # MainIntegration_EasyABC_Pipeline.R
 print(getwd())
 # Set your working directory (adjust the path as needed)
-FOLDER_OUTPUT <- "tristeza_empirca_aux/output"
-FOLDER_INTPUT <- "tristeza_empirca_aux/input"
+FOLDER_OUTPUT <- "tristeza_empirica_aux/output"
+FOLDER_INTPUT <- "tristeza_empirica_aux/input"
 data_path <- file.path(FOLDER_INTPUT, "BK_empiricalData_new.RData")
 
 
@@ -38,7 +38,18 @@ formula_list <- list(
   ),
   indonesianRice = formula(
     y ~ l_seed + l_urea + l_labour + l_land + DP + DV1 + DV2 + DSS
-  )
+  ),
+  usBanks = formula(
+    y ~ log(w1/w3)+log(w2/w3)+I((log(w1/w3))^2)+I((log(w2/w3))^2)+
+    I(log(w1/w3)*log(w2/w3))+log(y1)+ log(y2)+log(y3)+log(y4)+log(y5)+
+    I((log(y1))^2)+ I((log(y2))^2)+I((log(y3))^2)+I((log(y4))^2)+
+    I((log(y5))^2)+I(log(y1)*log(y2))+I(log(y1)*log(y3))+I(log(y1)*log(y4))+
+    I(log(y1)*log(y5))+I(log(y2)*log(y3))+I(log(y2)*log(y4))+I(log(y2)*log(y5))+
+    I(log(y3)*log(y4))+I(log(y3)*log(y5))+I(log(y4)*log(y5))+I(log(y1)*log(w1/w3))+
+    I(log(y1)*log(w2/w3))+I(log(y2)*log(w1/w3))+I(log(y2)*log(w2/w3))+
+    I(log(y3)*log(w1/w3))+I(log(y3)*log(w2/w3))+I(log(y4)*log(w1/w3))+
+    I(log(y4)*log(w2/w3))+I(log(y5)*log(w1/w3))+I(log(y5)*log(w2/w3))+trend
+    )
 )
 
 prior_list <- list(
@@ -69,6 +80,13 @@ prior_list <- list(
     c('unif', 0.06, 0.35),
     c('unif', 0.005, 0.12),
     c('unif', 0.02, 0.36)
+  ),
+  usBanks = list(
+    c('unif', -1.71, -0.71),
+    c('unif', 0.01, 0.1),
+    c('unif', 0.06, 0.26),
+    c('unif', 0.01, 0.18),
+    c('unif', 0.15, 0.35)
   )
 )
 
@@ -76,7 +94,8 @@ prior_list <- list(
 model_type_list <- list(swissRailWays = 'cost', 
                         spainDairy = 'production',
                         usElectricity = 'production',
-                        indonesianRice = 'production')
+                        indonesianRice = 'production',
+                        usBanks = 'cost')
 
 run_ABC_pipeline(
   app_name, data_path, formula_list, prior_list, model_type_list,
