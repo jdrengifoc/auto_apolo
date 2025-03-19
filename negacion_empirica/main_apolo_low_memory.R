@@ -1,7 +1,7 @@
 rm(list = ls())
 set.seed(010101)
 
-FOLDER <- 'auto_apolo/negacion_empirica'
+FOLDER <- 'auto_apolo/negacion_empirica_aux'
 source(file.path(FOLDER, 'Code/Fixed/requirements.R'))
 source(file.path(FOLDER, 'Code/Fixed/functions.R'))
 
