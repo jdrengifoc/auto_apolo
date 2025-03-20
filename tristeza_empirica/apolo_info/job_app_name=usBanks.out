@@ -1,6 +1,2 @@
-Mon Mar 17 17:44:01 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
-Mon Mar 17 17:44:01 -05 2025: activando venv abc4sfa
-Mon Mar 17 17:44:01 -05 2025: Ejecutando Rscript tristeza_empirica/jobs/main_app_name=usBanks.R
-[1] "/home/jdrengifoc/auto_apolo"
-===========================================
-Running ABC pipeline for application: usBanks 
+Wed Mar 19 19:08:37 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
+Wed Mar 19 19:08:37 -05 2025: activando venv abc4sfa

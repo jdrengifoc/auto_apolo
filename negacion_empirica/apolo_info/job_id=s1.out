@@ -1,3 +1,7 @@
-Mon Mar 17 18:12:52 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
-Mon Mar 17 18:12:52 -05 2025: activando venv abc4sfa
-Mon Mar 17 18:12:52 -05 2025: Ejecutando Rscript negacion_empirica/jobs/main_id=s1.R
+Wed Mar 19 18:59:16 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
+Wed Mar 19 18:59:16 -05 2025: activando venv abc4sfa
+Wed Mar 19 18:59:16 -05 2025: Ejecutando Rscript negacion_empirica/jobs/main_id=s1.R
+Simulation 1 has began at: 2025-03-19 18:57:30.939369 
+Batch 0 / 20  time:  2025-03-19 18:57:30.942099 
+Batch 1 / 20  time:  2025-03-19 19:01:51.897007 
+Batch 2 / 20  time:  2025-03-19 19:06:14.992 

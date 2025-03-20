@@ -1,7 +1,7 @@
 rm(list = ls())
 set.seed(010101)
 
-FOLDER <- 'auto_apolo/negacion_empirica'
+FOLDER <- 'negacion_empirica_aux'
 source(file.path(FOLDER, 'Code/Fixed/requirements.R'))
 source(file.path(FOLDER, 'Code/Fixed/functions.R'))
 
@@ -10,7 +10,7 @@ ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_Ystats.RData'))
 # ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_exp_Ystats.RData'))
 
 # Parameters.
-ID <- s4
+ID <- "s14"
 theta <- list(S = 1e7,                # Number of priors.
               delta = 1000 / 1e7,      # Selected priors proportion.
               parallel = T,           # Parallel computation?
