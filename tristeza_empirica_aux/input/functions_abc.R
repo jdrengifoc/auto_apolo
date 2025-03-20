@@ -296,7 +296,7 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
                               nb_simul = chunk_size_AR,
                               summary_stat_target = sum_stat_obs,
                               tol = tol,
-                              progress_bar = TRUE)
+                              progress_bar = FALSE)
 
     results_AR[[length(results_AR) + 1]] <- chunk_AR$param
     elapsed_AR <- as.numeric(difftime(Sys.time(), start_time_AR, units = "secs"))
