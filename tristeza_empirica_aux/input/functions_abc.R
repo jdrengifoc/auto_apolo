@@ -309,19 +309,19 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   # 10. Run MCMC ABC in chunks using EasyABC's ABC_mcmc (Marjoram method)
   cat("Starting MCMC ABC simulation...\n")
   start_time_MCMC <- Sys.time()
-  while(as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs")) < (time_limit_sec / 3)) {
+  while(as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs")) < time_limit_sec) {
     chunk_MCMC <- ABC_mcmc(method = "Marjoram",
                            model = sim_model,
                            prior = toy_prior,
                            summary_stat_target = sum_stat_obs,
                            n_rec = chunk_size_MCMC,
-                           n_between_sampling = 10,
+                           n_between_sampling = 30,
                            progress_bar = FALSE)
     results_MCMC[[length(results_MCMC) + 1]] <- chunk_MCMC$param
     elapsed_MCMC <- as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs"))
     cat("MCMC chunk completed. Elapsed time:", round(elapsed_MCMC, 1), "seconds\n")
   }
-  
+   
   combined_MCMC <- do.call(rbind, results_MCMC)
   PostMCMC <- coda::mcmc(combined_MCMC)
   
