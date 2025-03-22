@@ -346,9 +346,24 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   PostSMC <- coda::mcmc(combined_SMC)
   
   # 12. Save results for the application (optional)
-  save(PostAR, file = file.path(FOLDER_OUTPUT, paste0("ABCpostChain_AR_", app_name, ".RData")))
-  save(PostMCMC, file = file.path(FOLDER_OUTPUT, paste0("ABCpostChain_MCMC_", app_name, ".RData")))
-  save(PostSMC, file = file.path(FOLDER_OUTPUT, paste0("ABCpostChain_SMC_", app_name, ".RData")))
+  save(
+    PostAR, file = file.path(
+      sprintf("ABCpostChain_AR_%s_time=%d_chunk_size=%d.RData", 
+      app_name, time_limit_minutes, chunk_size)
+    )
+  )
+  save(
+    PostMCMC, file = file.path(
+      sprintf("ABCpostChain_MCMC_%s_time=%d_chunk_size=%d.RData", 
+      app_name, time_limit_minutes, chunk_size_MCMC)
+    )
+  )
+  save(
+    PostSMC, file = file.path(
+      sprintf("ABCpostChain_SMC_%s_time=%d_chunk_size=%d.RData", 
+      app_name, time_limit_minutes, chunk_size_SMC)
+    )
+  )
   
   # 13. Plot the posterior chains for diagnostics
   # par(mfrow = c(3, 1))
