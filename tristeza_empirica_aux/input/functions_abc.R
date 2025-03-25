@@ -349,7 +349,7 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   save(
     PostAR, file = file.path(
       sprintf("ABCpostChain_AR_%s_time=%d_chunk_size=%d.RData", 
-      app_name, time_limit_minutes, chunk_size)
+      app_name, time_limit_minutes, chunk_size_AR)
     )
   )
   save(
