@@ -11,7 +11,7 @@ data_path <- file.path(FOLDER_INTPUT, "BK_empiricalData_new.RData")
 # functions_abc.R should define get_Ti, SumStatOLS, get_SFpanelEasyABC, etc.
 source(file.path(FOLDER_INTPUT, "functions_abc.R"))
 
-app_name <- "usBanks"
+app_name <- "spainDairy"
 formula_list <- list(
   swissRailWays = formula(
     y ~ LNQ2 + LNQ3 + LNNET + LNSTOP + LNPK + LNPL +
@@ -100,6 +100,6 @@ model_type_list <- list(swissRailWays = 'cost',
 run_ABC_pipeline(
   app_name, data_path, formula_list, prior_list, model_type_list,
   time_limit_minutes = 900, tol = 0.01, 
-  chunk_size_AR = 1e4, chunk_size_MCMC = 1e4, chunk_size_SMC = 1e4
+  chunk_size_AR = 1e5, chunk_size_MCMC = 1e4, chunk_size_SMC = 5e3
   ) 
 
