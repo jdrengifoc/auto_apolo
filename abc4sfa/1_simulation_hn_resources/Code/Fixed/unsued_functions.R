@@ -1,3 +1,5 @@
+
+# Simulations -------------------------------------------------------------
 # Simulate data.
 #' Simulate Badunenko & Kumbhakar regressors.
 #' @param theta Parameter list, must include the sample size (n) and (t) as well
@@ -41,12 +43,12 @@ genData_BK <- function(theta, fig = F){
 #' Linear model: "ln", "linear; default.
 #' Cobb-Douglas: "cobb-douglas", "cb".
 #' @return the response variable of the GTRE model.
-SFM <- function(X, theta, dist = "halfnormal", name = "ln"){
+SFM <- function(X, theta, name = "ln"){
   # Parameter treatment.
-  dist = tolower(dist)
   name = tolower(name)
   n = theta$n
   t = theta$t
+  dist <- ifelse(is.null(theta$model), 'hn', tolower(theta$model))
   
   # Simulate inefficiency.
   if (dist %in% c("halfnormal", "half", "hn")){
@@ -92,13 +94,13 @@ SFM <- function(X, theta, dist = "halfnormal", name = "ln"){
   y <- model(X, theta$beta, v, v0, u, u0, name)
   return(y)
 }
-
-SFM_all <- function(X, theta, dist = "halfnormal", name = "ln"){
+# Unsed?
+SFM_all <- function(X, theta, name = "ln"){
   # Parameter treatment.
-  dist = tolower(dist)
   name = tolower(name)
   n = theta$n
   t = theta$t
+  dist <- ifelse(is.null(theta$model), 'hn', tolower(theta$model))
   
   # Simulate inefficiency.
   if (dist %in% c("halfnormal", "half", "hn")){
@@ -119,7 +121,7 @@ SFM_all <- function(X, theta, dist = "halfnormal", name = "ln"){
   
   # Measurement error.
   v <- rnorm(n*t, 0, theta$sigma[1])
-  # Unobserved heterogeneity.
+  # Unobserved heterogeneity. 
   v0 <- rnorm(n, 0, theta$sigma[2])
   v0 <- rep(v0, each = T)
   
@@ -154,11 +156,11 @@ SFM_all <- function(X, theta, dist = "halfnormal", name = "ln"){
 #' Halfnoralm: "halfnormal", "half", "hn"; default.
 #' Exponential: "exponential", "exp", "e".
 #' @return The residuals r = beta0 + v + v0 - (u - mean(u)) - (u0 - mean(u0)).
-simRes <- function(theta, prior, dist = "halfnormal") {
+simRes <- function(theta, prior) {
   # Parameter treatment.
-  dist = tolower(dist)
   n = theta$n
   t = theta$t
+  dist <- ifelse(is.null(theta$model), 'hn', tolower(theta$model))
   
   # Simulate inefficiency.
   if (dist %in% c("halfnormal", "half", "hn")){
@@ -182,72 +184,8 @@ simRes <- function(theta, prior, dist = "halfnormal") {
   # Unobserved heterogeneity.
   v0 <- rnorm(n, 0, prior[3])
   v0 <- rep(v0, each = t)
-  
   res <- prior[1] + v + v0 - (u - mean(u)) - (u0 - mean(u0))
   return(res)
-}
-
-#' Simulate the SFA residuals.
-#' @param theta Parameter list, the sample size.
-#' @param prior Atomic vector with the intercept B0, sigma_v, sigma_v0, sigma_u,
-#' sigma_u0.
-#' @param dist Inefficiency's distribution name; support capital letters.
-#' Halfnoralm: "halfnormal", "half", "hn"; default.
-#' Exponential: "exponential", "exp", "e".
-#' @return The residuals r = beta0 + v + v0 - (u - mean(u)) - (u0 - mean(u0)).
-simResEmpirical <- function(theta, prior, dist = "halfnormal") {
-  # Parameter treatment.
-  dist = tolower(dist)
-  n = theta$n
-  ts = theta$ts
-  
-  # Simulate inefficiency.
-  if (dist %in% c("halfnormal", "half", "hn")){
-    # Transitory inefficiency.
-    # u <- fdrtool::rhalfnorm(sum(ts), theta = sqrt(pi/2)/prior[4])
-    u <- fdrtool::rhalfnorm(n*ts, theta = sqrt((pi-2)/(2*prior[4]^2)))
-    # Permanent inefficiency.
-    #u0 <- fdrtool::rhalfnorm(n, theta = sqrt(pi/2)/prior[5])
-    u0 <- fdrtool::rhalfnorm(n, theta = sqrt((pi-2)/(2*prior[5]^2)))
-  }
-  else if (dist %in% c("exponential", "exp", "e")){
-    # Transitory inefficiency.
-    u <- rexp(sum(ts), rate = 1/prior[4])
-    # Permanent inefficiency.
-    u0 <- rexp(n, rate = 1/prior[5])
-  }
-  u0 <- repEachVec(u0, eachs = ts)
-  
-  # Measurement error.
-  v <- rnorm(sum(ts), 0, prior[2])
-  # Unobserved heterogeneity.
-  v0 <- rnorm(n, 0, prior[3])
-  v0 <- repEachVec(v0, eachs = ts)
-  
-  res <- prior[1] + v + v0 - (u - mean(u)) - (u0 - mean(u0))
-  return(res)
-}
-###### DOCUMENTAR.
-repEachVec <- function(x, eachs){
-  # Preallocate.
-  y <- rep(0, sum(eachs))
-  n <- length(x)
-  # Check dimensions.
-  if (n == length(eachs)) {
-    idx1 <- 1
-    idx2 <- eachs[1]
-    for (i in 1:n) {
-      each <- eachs[i]
-      y[idx1:idx2] <- x[i]
-      if (i != n){
-        idx1 <- idx1 + each
-        idx2 <- idx2 + eachs[i+1]
-      }
-    }
-  } else {
-    stop("`x` and `eachs` must have the same length")
-  }
-  return(y)
 }
 
 #' Compute the summary statistics of ABC for the simulated residuals.
@@ -278,46 +216,6 @@ getSumStats <- function(theta, resS){
   }
   # Individual unbiased variance of the residuals.
   s2IndS <- Sum_it / (n*t*(t-1)/2 - length(theta$beta))
-  # Idiosincratic variance (V_tot = V_ind + V_idio).
-  s2IdioS <- s2TotS - s2IndS
-  # Third and fourth central moments.
-  m3 <- mean((resS-m1)^3)
-  m4 <- mean((resS-m1)^4)
-  # Return the statistis.
-  return(c(m1, s2IndS, s2IdioS, m3, m4))
-}
-
-#' Compute the summary statistics of ABC for the simulated residuals.
-#' @param theta Parameter list, must include beta, the sample size and the
-#' variances of the error terms.
-#' @param resS `simRes()` residuals.
-#' @return Summary statistics of the residuals: m1, individual variance,
-#' idiosyncratic variance, m3, m4. Notice that the variance is unbiased.
-getSumStatsEmpirical <- function(theta, resS){
-  # Parameters treatment.
-  ts = theta$ts
-  n = theta$n
-  # Mean of the residuals.
-  m1 <- mean(resS)
-  # Total unbiased variance of the residuals.
-  s2TotS <- var(resS)*(sum(ts) - 1) / (sum(ts) - length(names(theta$X)))
-  # Central residuals with its "ID".
-  ResAPs <- cbind(theta$loc, resS - m1)
-  # Initialize the sum to compute the individual and idiosyncratic variance.
-  Sum_it <- 0
-  for(i in 1:n){
-    t <- length(ResAPs[ResAPs$id==i,3])
-    for(j in 1:(t-1)){
-      for(l in (j+1):t){
-        Res_it <- ResAPs[ResAPs[,1]==i,3]
-        Sum_it <- Sum_it + Res_it[j] * Res_it[l]
-      }
-    }
-  }
-  
-  # Individual unbiased variance of the residuals.
-  #### WARNING@
-  s2IndS <- Sum_it / (sum(ts))#*(t-1)/2 - length(names(data$X)))
   # Idiosincratic variance (V_tot = V_ind + V_idio).
   s2IdioS <- s2TotS - s2IndS
   # Third and fourth central moments.
@@ -366,47 +264,6 @@ getSampleSumStats <- function(theta, y, X){
   return(as.vector(Ystats))
 }
 
-#' Compute the summary statistics of ABC for the OLS residuals, viz. the sample
-#' statistics..
-#' @param theta Parameter list, must include beta, the sample size and the
-#' variances of the error terms.
-#' @param y output variable.
-#' @param X input matrix of dimensions n x p.
-#' @return Summary statistics of the residuals: beta0/m1, individual variance,
-#' idiosyncratic variance, m3, m4. Notice that the variance is unbiased.
-getSampleSumStatsEmpirical <- function(theta, y, X){
-  # Parameters treatment.
-  ts = theta$ts
-  n = theta$n
-  # OLS residuals.
-  reg <- lm(y ~ ., data.frame(y, X))
-  resOLS <- reg$res
-  # OLS residuals' unbiased variance.
-  OLSvar <- sum(resOLS^2)/(sum(ts) - length(names(X)))
-  # OLS residuals with its "ID".
-  ResAP <- cbind(theta$loc, resOLS)
-  # Initialize the sum to compute the individual and idiosyncratic variance.
-  Sum_it <- 0
-  for(i in 1:n){
-    t <- dim(ResAP[ResAP$id==i,])[1]
-    for(j in 1:(t-1)){
-      for(l in (j+1):t){
-        Res_it <- ResAP[ResAP[,1]==i,3]
-        Sum_it <- Sum_it + Res_it[j] * Res_it[l]
-      }
-    }
-  }
-  # Individual variance with small sample correction of the residuals.
-  ##### WARNING #####
-  s2IndOLS <- Sum_it / (sum(ts)*(t-1)/2 - length(names(X)))
-  # Idiosincratic variance (V_tot = V_ind + V_idio).
-  s2IdioOLS <- OLSvar - s2IndOLS
-  # Return the statistis.
-  Ystats <- c(reg$coef[[1]], s2IndOLS, s2IdioOLS,
-              mean(resOLS^3), mean(resOLS^4))
-  return(as.vector(Ystats))
-}
-
 #' Approximate Bayesian Computation for stochastic frontier panel data model (GTRE).
 #' @param theta Parameter list, must include FALTA.
 #' @param SumStatsY Summary statistics of the sample calculated with `getSampleSumStats()`
@@ -422,16 +279,16 @@ ABCpanelSFA <- function(theta, SumStatsY) {
   priors <- sapply(1:length(theta$lb), function(i) {runif(S, theta$lb[i], theta$ub[i])})
   # Simulate the residuals for each row of the prior combination.
   z <- apply(priors, 1, function(prior) {
-    simRes(theta = theta, prior = prior, dist = "halfnormal")})
+    simRes(theta = theta, prior = prior)})
   # Get the summary statistics of the residuals.
   SumStatsZs <- sapply(1:S, function(x) {
     getSumStats(theta, z[,x])
-    })
+  })
   # Compute the square of the euclidean distance of the simulated summary statistics against
   # the sample statistics.
   EucDist <- sapply(1:S, function(x) {
     sum((SumStatsZs[, x]-SumStatsY)^2)
-    })
+  })
   # Sort the distances.
   I <- order(EucDist)
   selPrior <- priors[I, ][1:SelS, ]
@@ -455,7 +312,7 @@ parallel_ABCpanelSFA <- function(theta, SumStatsY) {
   priors <- parSapply(cluster, 1:length(theta$lb), function(i) {runif(S, theta$lb[i], theta$ub[i])})
   # Simulate the residuals for each row of the prior combination.
   z <- parApply(cluster, priors, 1, function(prior) {
-    simRes(theta = theta, prior = prior, dist = "halfnormal")})
+    simRes(theta = theta, prior = prior)})
   # Get the summary statistics of the residuals.
   SumStatsZs <- parSapply(cluster, 1:S, function(x) {
     getSumStats(theta, z[,x])
@@ -551,6 +408,173 @@ batchABCpanelSFA <- function(theta, SumStatsY, maxSelS = 100, SBatch = 5e5) {
   return(ABCpostChain)
 }
 
+#' Function that returns the number of samples that must be simulated to
+#' guarantee O-big convergency.
+#' @param n: Number of samples (dot<t_i, n_i>)
+#' @param d: Number of parameters to be estimated.
+#' @param S_best: number of best samples to be selected.
+getNumSamplesToGuaranteeConvergence <- function(n, d = 5, S_best = 100){
+  delta <- n^(-d/2) * log(n) ^ (-1)
+  # Number of simulation
+  S <- S_best / delta
+  return(S)
+}
+
+
+
+# Empirical data ----------------------------------------------------------
+#' Simulate the SFA residuals.
+#' @param theta Parameter list, the sample size.
+#' @param prior Atomic vector with the intercept B0, sigma_v, sigma_v0, sigma_u,
+#' sigma_u0.
+#' @param dist Inefficiency's distribution name; support capital letters.
+#' Halfnoralm: "halfnormal", "half", "hn"; default.
+#' Exponential: "exponential", "exp", "e".
+#' @return The residuals r = beta0 + v + v0 - (u - mean(u)) - (u0 - mean(u0)).
+simResEmpirical <- function(theta, prior) {
+  repEachVec <- function(x, eachs){
+    # Preallocate.
+    y <- rep(0, sum(eachs))
+    n <- length(x)
+    # Check dimensions.
+    if (n == length(eachs)) {
+      idx1 <- 1
+      idx2 <- eachs[1]
+      for (i in 1:n) {
+        each <- eachs[i]
+        y[idx1:idx2] <- x[i]
+        if (i != n){
+          idx1 <- idx1 + each
+          idx2 <- idx2 + eachs[i+1]
+        }
+      }
+    } else {
+      stop("`x` and `eachs` must have the same length")
+    }
+    return(y)
+  }
+  # Parameter treatment.
+  n <- theta$n
+  ts <- theta$ts
+  dist <- ifelse(is.null(theta$model), 'hn', tolower(theta$model))
+  
+  # Simulate inefficiency.
+  if (dist %in% c("halfnormal", "half", "hn")){
+    # Transitory inefficiency.
+    # u <- fdrtool::rhalfnorm(sum(ts), theta = sqrt(pi/2)/prior[4])
+    u <- fdrtool::rhalfnorm(n*ts, theta = sqrt((pi-2)/(2*prior[4]^2)))
+    # Permanent inefficiency.
+    #u0 <- fdrtool::rhalfnorm(n, theta = sqrt(pi/2)/prior[5])
+    u0 <- fdrtool::rhalfnorm(n, theta = sqrt((pi-2)/(2*prior[5]^2)))
+  }
+  else if (dist %in% c("exponential", "exp", "e")){
+    # Transitory inefficiency.
+    u <- rexp(sum(ts), rate = 1/prior[4])
+    # Permanent inefficiency.
+    u0 <- rexp(n, rate = 1/prior[5])
+  }
+  u0 <- repEachVec(u0, eachs = ts)
+  
+  # Measurement error.
+  v <- rnorm(sum(ts), 0, prior[2])
+  # Unobserved heterogeneity.
+  v0 <- rnorm(n, 0, prior[3])
+  v0 <- repEachVec(v0, eachs = ts)
+  
+  res <- prior[1] + v + v0 - (u - mean(u)) - (u0 - mean(u0))
+  return(res)
+}
+
+#' Compute the summary statistics of ABC for the simulated residuals.
+#' @param theta Parameter list, must include beta, the sample size and the
+#' variances of the error terms.
+#' @param resS `simRes()` residuals.
+#' @return Summary statistics of the residuals: m1, individual variance,
+#' idiosyncratic variance, m3, m4. Notice that the variance is unbiased.
+getSumStatsEmpirical <- function(theta, resS){
+  # Parameters treatment.
+  ts = theta$ts
+  n = theta$n
+  # Mean of the residuals.
+  m1 <- mean(resS)
+  # Total unbiased variance of the residuals.
+  s2TotS <- var(resS)*(sum(ts) - 1) / (sum(ts) - length(names(theta$X)))
+  # Central residuals with its "ID".
+  ResAPs <- cbind(theta$loc, resS - m1)
+  # Initialize the sum to compute the individual and idiosyncratic variance.
+  Sum_it <- 0
+  for(i in 1:n){
+    t <- length(ResAPs[ResAPs$id==i,3])
+    for(j in 1:(t-1)){
+      for(l in (j+1):t){
+        Res_it <- ResAPs[ResAPs[,1]==i,3]
+        Sum_it <- Sum_it + Res_it[j] * Res_it[l]
+      }
+    }
+  }
+  
+  # Individual unbiased variance of the residuals.
+  #### WARNING@
+  s2IndS <- Sum_it / (sum(ts))#*(t-1)/2 - length(names(data$X)))
+  # Idiosincratic variance (V_tot = V_ind + V_idio).
+  s2IdioS <- s2TotS - s2IndS
+  # Third and fourth central moments.
+  m3 <- mean((resS-m1)^3)
+  m4 <- mean((resS-m1)^4)
+  # Return the statistis.
+  return(c(m1, s2IndS, s2IdioS, m3, m4))
+}
+
+#' Compute the summary statistics of ABC for the OLS residuals, viz. the sample
+#' statistics..
+#' @param theta Parameter list, must include beta, the sample size and the
+#' variances of the error terms.
+#' @param y output variable.
+#' @param X input matrix of dimensions n x p.
+#' @return Summary statistics of the residuals: beta0/m1, individual variance,
+#' idiosyncratic variance, m3, m4. Notice that the variance is unbiased.
+getSampleSumStatsEmpirical <- function(theta, y, X){
+  # Parameters treatment.
+  ts <- theta$ts
+  n <- theta$n
+  loc <- theta$loc
+  
+  # OLS residuals.
+  if (is.null(loc)){
+    reg <- lm(y ~ ., data.frame(y, X))
+  } else {
+    formulae <- paste('y ~', paste(names(data.frame(X)), collapse = ' + '))
+    reg <- plm(formulae, data.frame(y, loc, X), model="random",random.method = 'amemiya',
+               index = c("id", "time"))  
+  }
+  
+  resOLS <- reg$res
+  # OLS residuals' unbiased variance.
+  OLSvar <- sum(resOLS^2)/(sum(ts) - length(names(X)))
+  # OLS residuals with its "ID".
+  ResAP <- cbind(theta$loc, resOLS)
+  # Initialize the sum to compute the individual and idiosyncratic variance.
+  Sum_it <- 0
+  for(i in 1:n){
+    t <- dim(ResAP[ResAP$id==i,])[1]
+    for(j in 1:(t-1)){
+      for(l in (j+1):t){
+        Res_it <- ResAP[ResAP[,1]==i,3]
+        Sum_it <- Sum_it + Res_it[j] * Res_it[l]
+      }
+    }
+  }
+  # Individual variance with small sample correction of the residuals.
+  ##### WARNING #####
+  s2IndOLS <- Sum_it / (sum(ts)*(t-1)/2 - length(names(X)))
+  # Idiosincratic variance (V_tot = V_ind + V_idio).
+  s2IdioOLS <- OLSvar - s2IndOLS
+  # Return the statistis.
+  Ystats <- c(reg$coef[[1]], s2IndOLS, s2IdioOLS,
+              mean(resOLS^3), mean(resOLS^4))
+  return(as.vector(Ystats))
+  
+}
 #' Approximate Bayesian Computation for stochastic frontier panel data model (GTRE).
 #' @param theta Parameter list, must include FALTA.
 #' @param SumStatsY Summary statistics of the sample calculated with `getSampleSumStats()`
@@ -566,7 +590,7 @@ ABCpanelSFAEmpirical <- function(theta, SumStatsY) {
   priors <- sapply(1:length(theta$lb), function(i) {runif(S, theta$lb[i], theta$ub[i])})
   # Simulate the residuals for each row of the prior combination.
   z <- apply(priors, 1, function(prior) {
-    simResEmpirical(theta = theta, prior = prior, dist = "halfnormal")})
+    simResEmpirical(theta = theta, prior = prior)})
   # Get the summary statistics of the residuals.
   SumStatsZs <- sapply(1:S, function(x) {
     getSumStatsEmpirical(theta, z[,x])
@@ -599,7 +623,7 @@ parallel_ABCpanelSFAEmpirical <- function(theta, SumStatsY) {
   priors <- parSapply(cluster, 1:length(theta$lb), function(i) {runif(theta$S, theta$lb[i], theta$ub[i])})
   # Simulate the residuals for each row of the prior combination.
   z <- parApply(cluster, priors, 1, function(prior) {
-    simResEmpirical(theta = theta, prior = prior, dist = "halfnormal")})
+    simResEmpirical(theta = theta, prior = prior)})
   # Get the summary statistics of the residuals.
   # SumStatsZs <- sapply(1:S, function(x) {
   #   getSumStatsEmpirical(theta, z[,x])
@@ -644,7 +668,7 @@ batchABCpanelSFAEmpirical <- function(theta, SumStatsY, SBatch = 1e5) {
   S <- theta$S
   maxSelS <- theta$S_best  
   # The selected samples are maximum maxSelS.
-  SelS <- min(theta$S_best, maxSelS)
+  SelS <- min(S, maxSelS)
   
   if (S <= SBatch){
     if (theta$parallel){
@@ -705,14 +729,167 @@ batchABCpanelSFAEmpirical <- function(theta, SumStatsY, SBatch = 1e5) {
   return(ABCpostChain)
 }
 
-#' Function that returns the number of samples that must be simulated to
-#' guarantee O-big convergency.
-#' @param n: Number of samples (dot<t_i, n_i>)
-#' @param d: Number of parameters to be estimated.
-#' @param S_best: number of best samples to be selected.
-getNumSamplesToGuaranteeConvergence <- function(n, d = 5, S_best = 100){
-  delta <- n^(-d/2) * log(n) ^ (-1)
-  # Number of simulation
-  S <- S_best / delta
-  return(S)
+# Error measurement -------------------------------------------------------
+#'  Auxiliar for estimation of technical efficiency of Colombi et al. (2014).
+#'  A = −p × [1Ti ITi] is a matrix of dimension Ti × (Ti + 1),  where 1Ti is the
+#' column vector of length Ti, and ITi is the identity matrix of dimension T.
+get_A <- function(T_i, p) { 
+  A <- -p * cbind(rep(1,T_i), diag(T_i))
+  return(A)
+}
+
+#'  Auxiliar for estimation of technical efficiency of Colombi et al. (2014).
+#'  Composed error term of the joint density function.
+get_epsiloni <- function(y, X, beta){
+  epsiloni <- y - X%*%beta
+  return(epsiloni)
+}
+
+#' Auxiliar for estimation of technical efficiency of Colombi et al. (2014).
+#' Diagonal? matrix of dimension T_i + 1, 
+#' where its diagonal is [sigma_u0, sigma_u_1, ..., sigma_u_T_i].
+get_V <- function(sigma_u0, sigma_u, T_i){
+  V <- diag(c(sigma_u0^2, rep(sigma_u^2, T_i)))
+  return(V)
+}
+
+#' Auxiliar for estimation of technical efficiency of Colombi et al. (2014).
+get_Sigma <- function(sigma_v, sigma_v0, T_i){
+  Sigma <- sigma_v^2 * diag(T_i) + sigma_v0^2 * rep(1, T_i)%*%t(rep(1,T_i))
+  return(Sigma)
+}
+
+#' Auxiliar for estimation of technical efficiency of Colombi et al. (2014).
+get_Lambda <- function(V, A, Sigma){
+  Lambda <- solve(solve(V) + t(A)%*%solve(Sigma)%*%A)
+  return(Lambda)
+}
+
+#' Auxiliar for estimation of technical efficiency of Colombi et al. (2014).
+get_R <- function(Lambda, A, Sigma){
+  R <- Lambda%*%t(A)%*%solve(Sigma)
+  return(R)
+}
+
+#' Probability that a q-variate normal variable of expected value \pmb\mu
+#' and variance \Sigma belongs to the positive orthant.
+probPosOrthant <- function(Mean, Sigma) {
+  Mean <- as.vector(Mean)
+  Phi_bar <- pmvnorm(lower = 0, upper = Inf, mean = Mean, sigma = Sigma)
+  return(Phi_bar)
+}
+
+#' Estimation of technical efficiency of Colombi et al. (2014).
+#' @param p Production 1; Cost -1
+ColombiExpectation <- function(n, Ts, y, X, betas, sigmas, p = 1){
+  # Change balanced notation to unbalanced panel data notation.
+  if (length(Ts) == 1 & length(Ts) < n) {
+    Ts <- rep(Ts, n)
+  }
+  # Unwrap variances.
+  sigma_v <- sigmas[1]
+  sigma_v0 <- sigmas[2]
+  sigma_u <- sigmas[3]
+  sigma_u0 <- sigmas[4]
+  # Preallocate.
+  ExpectedTIs <- vector(mode = "list", length = length(ts))
+  epsilonis <- get_epsiloni(y, X, betas)
+  
+  # For each individual.
+  idx <- 0
+  for (i in 1:n){
+    # Get indexes for individual i.
+    T_i <- Ts[i]
+    I <- (1:T_i) + idx
+    
+    A <- get_A(T_i, p)
+    epsiloni <- epsilonis[I]
+    V <- get_V(sigma_u0, sigma_u, T_i)
+    Sigma <- get_Sigma(sigma_v, sigma_v0, T_i)
+    Lambda <- get_Lambda(V, A, Sigma)
+    R <- get_R(Lambda, A, Sigma)
+    
+    tBold <- diag(T_i+1)
+    # Preallocate.
+    ExpectedTI_i <- rep(0, T_i+1)
+    for (t_i in 1:(T_i+1)){
+      ExpectedTI_i[t_i] <- probPosOrthant(R%*%epsiloni + Lambda%*%tBold[t_i,], Lambda) /
+        probPosOrthant(R%*%epsiloni, Lambda) *
+        exp(t(tBold[t_i,])%*%R%*%epsiloni + 0.5*t(tBold[t_i,])%*%Lambda%*%tBold[t_i,])
+    }
+    ExpectedTIs[[i]] <- ExpectedTI_i
+    # Update individual index.
+    idx <- T_i + idx
+  }
+  return(ExpectedTIs)
+}
+
+inv <- function(x){
+  xinv <- 1/x
+  overallEf <- xinv[1]*xinv[2:length(x)]
+  return(c(xinv,  overallEf))
+}
+
+
+# Metropolis-Hasting ------------------------------------------------------
+inputsMH <- function(residuals, t_periods, variances) {
+  sv <- variances[["sigma_v"]]
+  sa <- variances[["sigma_v0"]]
+  su <- variances[["sigma_u"]]
+  seta <- variances[["sigma_u0"]]
+  
+  A <- cbind(1, diag(t_periods))
+  it <- rep(1, t_periods)
+  Sigma <- sv^2 * diag(t_periods) + sa^2*it%*%t(it) 
+  V <- diag(c(seta^2, rep(su^2, t_periods)))
+  iSigma <- solve(Sigma)
+  Lambda <- solve(solve(V) + t(A)%*%iSigma%*%A)
+  R <- Lambda%*%t(A)%*%iSigma
+  # Proposal. Must have the same support (0, inf).
+  u <- tmvtnorm::rtmvnorm(1, mean = c(R%*%residuals), sigma = Lambda,
+                          lower = rep(0, length = t_periods + 1), 
+                          upper = rep(Inf, length = t_periods + 1), 
+                          algorithm = 'gibbs')
+  return(list(u = u, A = A, Sigma = Sigma, V = V, R = R, 
+              Lambda = Lambda, iSigma = iSigma))
+}
+uDrawMH <- function(inputs_MH, residuals, t_periods, variances, tun = 1) {
+  # Unpack parameters.
+  u <- inputs_MH$u
+  A <- inputs_MH$A
+  Sigma <- inputs_MH$Sigma
+  iSigma <- inputs_MH$iSigma
+  V <- inputs_MH$V
+  R <- inputs_MH$R
+  Lambda <- tun * inputs_MH$Lambda
+  seta <- variances[["sigma_u0"]]
+  su <- variances[["sigma_u"]]
+  
+  uc <- tmvtnorm::rtmvnorm(1, mean = c(R%*%residuals), sigma = Lambda,
+                           lower=rep(0, length = t_periods + 1), 
+                           upper=rep(Inf, length = t_periods + 1), 
+                           algorithm = 'gibbs')
+  quc <- tmvtnorm::dtmvnorm(uc, mean = c(R%*%residuals), sigma = Lambda,
+                            lower = rep(0, length = t_periods + 1), 
+                            upper = rep(Inf, length = t_periods + 1))
+  qu <- tmvtnorm::dtmvnorm(u, mean = c(R%*%residuals), sigma = Lambda,
+                           lower = rep(0, length = t_periods + 1), 
+                           upper = rep(Inf, length = t_periods + 1))
+  fuc <- -0.5*t(residuals - A%*%c(uc))%*%iSigma%*%(residuals - A%*%c(uc)) - 
+    t(c(seta, rep(su, t_periods)))%*%t(uc)
+  fu <- -0.5*t(residuals - A%*%c(u))%*%iSigma%*%(residuals - A%*%c(u)) - 
+    t(c(seta, rep(su, t_periods)))%*%t(u)
+  # Criterio de transición. Cómo actualizamos la cadena.
+  alpha <- min(exp(fuc-fu) * qu/quc, 1, na.rm = T)
+  unif <- runif(1, 0, 1)
+  if(unif < alpha){
+    unew <- uc
+    accept <- 1
+  } else{
+    unew <- u
+    accept <- 0
+  }
+  inputs_MH$u <- unew
+  inputs_MH$accept <- c(inputs_MH$accept, accept)
+  return(inputs_MH)
 }

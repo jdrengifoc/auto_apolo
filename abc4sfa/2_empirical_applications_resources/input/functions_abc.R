@@ -245,7 +245,7 @@ ABCpanelSFA_AR <- function(S, Hyp, a, Ti, K, OLSreg, regBetween, num_chunks = 5,
 run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, model_type_list,
                              time_limit_minutes = 60, chunk_size_AR = 500, 
                              chunk_size_MCMC = 500, chunk_size_SMC = 1000, 
-                             tol = 0.1) {
+                             tol = 0., folder_output = '.') {
   
   cat("===========================================\n")
   cat("Running ABC pipeline for application:", app_name, "\n")
@@ -348,20 +348,23 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   # 12. Save results for the application (optional)
   save(
     PostAR, file = file.path(
-      sprintf("ABCpostChain_AR_%s_time=%d_chunk_size=%d.RData", 
-      app_name, time_limit_minutes, chunk_size_AR)
+      folder_output,
+      sprintf("ABCpostChain_AR_%s_time=%d_chunk_size=%d_%s.RData", 
+      app_name, time_limit_minutes, chunk_size_AR, Sys.Date())
     )
   )
   save(
     PostMCMC, file = file.path(
-      sprintf("ABCpostChain_MCMC_%s_time=%d_chunk_size=%d.RData", 
-      app_name, time_limit_minutes, chunk_size_MCMC)
+      folder_output,
+      sprintf("ABCpostChain_MCMC_%s_time=%d_chunk_size=%d_%s.RData", 
+      app_name, time_limit_minutes, chunk_size_MCMC, Sys.Date())
     )
   )
   save(
     PostSMC, file = file.path(
-      sprintf("ABCpostChain_SMC_%s_time=%d_chunk_size=%d.RData", 
-      app_name, time_limit_minutes, chunk_size_SMC)
+      folder_output,
+      sprintf("ABCpostChain_SMC_%s_time=%d_chunk_size=%d_%s.RData", 
+      app_name, time_limit_minutes, chunk_size_SMC, Sys.Date())
     )
   )
   

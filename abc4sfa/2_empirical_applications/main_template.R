@@ -1,10 +1,10 @@
 # Pipeline for Running ABC on Multiple Applications
 # MainIntegration_EasyABC_Pipeline.R
-print(getwd())
 # Set your working directory (adjust the path as needed)
-FOLDER_OUTPUT <- "tristeza_empirica_aux/output"
-FOLDER_INTPUT <- "tristeza_empirica_aux/input"
-data_path <- file.path(FOLDER_INTPUT, "BK_empiricalData_new.RData")
+FOLDER <- "abc4sfa/2_empirical_applications_resources"
+FOLDER_OUTPUT <- file.path(FOLDER, "output")
+FOLDER_INTPUT <- file.path(FOLDER, "input")
+data_path <- file.path(FOLDER_INTPUT, "BK_empiricalData.RData")
 
 
 # Source your helper functions.
@@ -100,6 +100,7 @@ model_type_list <- list(swissRailWays = 'cost',
 run_ABC_pipeline(
   app_name, data_path, formula_list, prior_list, model_type_list,
   time_limit_minutes = __time_limit_minutes__, tol = 0.01, 
-  chunk_size_AR = 1e5, chunk_size_MCMC = 1e4, chunk_size_SMC = 5e3
+  chunk_size_AR = 1e5, chunk_size_MCMC = 1e4, chunk_size_SMC = 5e3,
+  folder_output = FOLDER_OUTPUT
   ) 
 
