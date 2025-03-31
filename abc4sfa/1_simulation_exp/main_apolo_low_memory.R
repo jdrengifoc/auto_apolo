@@ -21,13 +21,13 @@ theta <- c(ABC_inputs[[ID]]$params, theta)
 theta$nsim <- 100
 theta$model <- 'exp'
 
+# filename <- file.path(
+#     FOLDER, 
+#     sprintf("Data/Outputs/BK_hn_%s_misspecification_exp_%s.RData", theta$ID, Sys.Date())
+#     )
 filename <- file.path(
     FOLDER, 
-    sprintf("Data/Outputs/BK_hn_%s_misspecification_exp_%s.RData", theta$ID, Sys.Date())
-    )
-filename <- file.path(
-    FOLDER, 
-    sprintf("Data/Outputs/BK_exp_%s.RData", theta$ID)
-    )
+    sprintf("Data/Outputs/BK_exp_%s_%s.RData", theta$ID, Sys.Date())
+)
 
 source(file.path(FOLDER, 'Code/apolo_sim_low_memory.R'))
