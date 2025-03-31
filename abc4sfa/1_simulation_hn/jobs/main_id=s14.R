@@ -1,10 +1,11 @@
 rm(list = ls())
 set.seed(010101)
 
-FOLDER <- 'negacion_empirica_aux'
-source(file.path(FOLDER, 'Code/Fixed/requirements.R'))
-source(file.path(FOLDER, 'Code/Fixed/functions.R'))
+SETUP_FOLDER <- 'abc4sfa/setup'
+source(file.path(SETUP_FOLDER, 'requirements.R'))
+source(file.path(SETUP_FOLDER, 'functions.R'))
 
+FOLDER <- 'abc4sfa/1_simulation_hn_resources'
 # Read inputs.
 ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_Ystats.RData'))
 # ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_exp_Ystats.RData'))
@@ -20,7 +21,10 @@ theta <- c(ABC_inputs[[ID]]$params, theta)
 theta$nsim <- 100
 theta$model <- 'exp'
 
-filename <- file.path(FOLDER, sprintf("Data/Outputs/BK_hn_%s_misspecification_exp.RData", theta$ID))
+filename <- file.path(
+    FOLDER, 
+    sprintf("Data/Outputs/BK_hn_%s_misspecification_exp_%s.RData", theta$ID, Sys.Date())
+    )
 # filename <- file.path(FOLDER, sprintf("Data/Outputs/BK_exp_%s.RData", theta$ID))
 
 source(file.path(FOLDER, 'Code/apolo_sim_low_memory.R'))
