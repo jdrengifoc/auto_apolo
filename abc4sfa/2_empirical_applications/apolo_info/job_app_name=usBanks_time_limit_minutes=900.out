@@ -1,6 +1,6 @@
-Tue Mar 25 22:38:35 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
-Tue Mar 25 22:38:35 -05 2025: activando venv abc4sfa
-Tue Mar 25 22:38:35 -05 2025: Ejecutando Rscript abc4sfa/2_empirical_applications/jobs/main_app_name=usBanks_time_limit_minutes=20000.R
+Sun Apr  6 12:32:29 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
+Sun Apr  6 12:32:29 -05 2025: activando venv abc4sfa
+Sun Apr  6 12:32:29 -05 2025: Ejecutando Rscript abc4sfa/2_empirical_applications/jobs/main_app_name=usBanks_time_limit_minutes=900.R
 ===========================================
 Running ABC pipeline for application: usBanks 
 OLS regression summary:
@@ -59,33 +59,5 @@ Multiple R-squared:  0.9733,	Adjusted R-squared:  0.9724
 F-statistic:  1105 on 36 and 1091 DF,  p-value: < 2.2e-16
 
 Observed summary statistics:
-[1] 1.868951e-18 2.734397e-02 2.271415e-02 1.845330e-03 1.143514e-02
-Starting Accept-Reject ABC (AR) simulation...
-AR chunk completed. Elapsed time: 23330 seconds
-AR chunk completed. Elapsed time: 45266.6 seconds
-AR chunk completed. Elapsed time: 66892.3 seconds
-AR chunk completed. Elapsed time: 88502.5 seconds
-AR chunk completed. Elapsed time: 110187.5 seconds
-AR chunk completed. Elapsed time: 131806.2 seconds
-AR chunk completed. Elapsed time: 153352.6 seconds
-AR chunk completed. Elapsed time: 174880.2 seconds
-AR chunk completed. Elapsed time: 196448.2 seconds
-AR chunk completed. Elapsed time: 217978.5 seconds
-AR chunk completed. Elapsed time: 239568.7 seconds
-AR chunk completed. Elapsed time: 261127.2 seconds
-AR chunk completed. Elapsed time: 282714.3 seconds
-AR chunk completed. Elapsed time: 304273.9 seconds
-AR chunk completed. Elapsed time: 325878.6 seconds
-AR chunk completed. Elapsed time: 347431.9 seconds
-AR chunk completed. Elapsed time: 368871.6 seconds
-AR chunk completed. Elapsed time: 390216.1 seconds
-AR chunk completed. Elapsed time: 411527 seconds
-AR chunk completed. Elapsed time: 432794.5 seconds
-AR chunk completed. Elapsed time: 454069.2 seconds
-AR chunk completed. Elapsed time: 475359 seconds
-AR chunk completed. Elapsed time: 496627.2 seconds
-AR chunk completed. Elapsed time: 517939.8 seconds
-AR chunk completed. Elapsed time: 539229.3 seconds
-AR chunk completed. Elapsed time: 560517.4 seconds
-AR chunk completed. Elapsed time: 581806.1 seconds
-AR chunk completed. Elapsed time: 603104.8 seconds
+[1] -2.076949e-18  2.734397e-02  2.271415e-02  1.845330e-03  1.143514e-02
+Starting SMC ABC simulation...
