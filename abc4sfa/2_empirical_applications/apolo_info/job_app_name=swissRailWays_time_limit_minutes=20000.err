@@ -7,3 +7,4 @@ Loading required package: SparseM
 Loading required package: MASS
 Loading required package: locfit
 locfit 1.5-9.12 	 2025-03-05
+slurmstepd: error: *** JOB 86816 ON compute-0-30 CANCELLED AT 2025-04-01T22:38:03 DUE TO TIME LIMIT ***
