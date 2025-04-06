@@ -287,43 +287,43 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   results_SMC  <- list()   # For SMC ABC
   
   # 9. Run Accept/Reject ABC (AR) in chunks using EasyABC's ABC_rejection
-  cat("Starting Accept-Reject ABC (AR) simulation...\n")
-  start_time_AR <- Sys.time()
+  # cat("Starting Accept-Reject ABC (AR) simulation...\n")
+  # start_time_AR <- Sys.time()
 
-  while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {
-    chunk_AR <- ABC_rejection(model = sim_model,
-                              prior = toy_prior,
-                              nb_simul = chunk_size_AR,
-                              summary_stat_target = sum_stat_obs,
-                              tol = tol,
-                              progress_bar = FALSE)
+  # while(as.numeric(difftime(Sys.time(), start_time_AR, units = "secs")) < time_limit_sec) {
+  #   chunk_AR <- ABC_rejection(model = sim_model,
+  #                             prior = toy_prior,
+  #                             nb_simul = chunk_size_AR,
+  #                             summary_stat_target = sum_stat_obs,
+  #                             tol = tol,
+  #                             progress_bar = FALSE)
 
-    results_AR[[length(results_AR) + 1]] <- chunk_AR$param
-    elapsed_AR <- as.numeric(difftime(Sys.time(), start_time_AR, units = "secs"))
-    cat("AR chunk completed. Elapsed time:", round(elapsed_AR, 1), "seconds\n")
-  }
+  #   results_AR[[length(results_AR) + 1]] <- chunk_AR$param
+  #   elapsed_AR <- as.numeric(difftime(Sys.time(), start_time_AR, units = "secs"))
+  #   cat("AR chunk completed. Elapsed time:", round(elapsed_AR, 1), "seconds\n")
+  # }
   
-  combined_AR <- do.call(rbind, results_AR)
-  PostAR <- coda::mcmc(combined_AR)
+  # combined_AR <- do.call(rbind, results_AR)
+  # PostAR <- coda::mcmc(combined_AR)
   
   # 10. Run MCMC ABC in chunks using EasyABC's ABC_mcmc (Marjoram method)
-  cat("Starting MCMC ABC simulation...\n")
-  start_time_MCMC <- Sys.time()
-  while(as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs")) < time_limit_sec) {
-    chunk_MCMC <- ABC_mcmc(method = "Marjoram",
-                           model = sim_model,
-                           prior = toy_prior,
-                           summary_stat_target = sum_stat_obs,
-                           n_rec = chunk_size_MCMC,
-                           n_between_sampling = 30,
-                           progress_bar = FALSE)
-    results_MCMC[[length(results_MCMC) + 1]] <- chunk_MCMC$param
-    elapsed_MCMC <- as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs"))
-    cat("MCMC chunk completed. Elapsed time:", round(elapsed_MCMC, 1), "seconds\n")
-  }
+  # cat("Starting MCMC ABC simulation...\n")
+  # start_time_MCMC <- Sys.time()
+  # while(as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs")) < time_limit_sec) {
+  #   chunk_MCMC <- ABC_mcmc(method = "Marjoram",
+  #                          model = sim_model,
+  #                          prior = toy_prior,
+  #                          summary_stat_target = sum_stat_obs,
+  #                          n_rec = chunk_size_MCMC,
+  #                          n_between_sampling = 30,
+  #                          progress_bar = FALSE)
+  #   results_MCMC[[length(results_MCMC) + 1]] <- chunk_MCMC$param
+  #   elapsed_MCMC <- as.numeric(difftime(Sys.time(), start_time_MCMC, units = "secs"))
+  #   cat("MCMC chunk completed. Elapsed time:", round(elapsed_MCMC, 1), "seconds\n")
+  # }
    
-  combined_MCMC <- do.call(rbind, results_MCMC)
-  PostMCMC <- coda::mcmc(combined_MCMC)
+  # combined_MCMC <- do.call(rbind, results_MCMC)
+  # PostMCMC <- coda::mcmc(combined_MCMC)
   
   # 11. Run SMC ABC in chunks using EasyABC's ABC_sequential
   cat("Starting SMC ABC simulation...\n")
@@ -346,20 +346,20 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   PostSMC <- coda::mcmc(combined_SMC)
   
   # 12. Save results for the application (optional)
-  save(
-    PostAR, file = file.path(
-      folder_output,
-      sprintf("ABCpostChain_AR_%s_time=%d_chunk_size=%d_%s.RData", 
-      app_name, time_limit_minutes, chunk_size_AR, Sys.Date())
-    )
-  )
-  save(
-    PostMCMC, file = file.path(
-      folder_output,
-      sprintf("ABCpostChain_MCMC_%s_time=%d_chunk_size=%d_%s.RData", 
-      app_name, time_limit_minutes, chunk_size_MCMC, Sys.Date())
-    )
-  )
+  # save(
+  #   PostAR, file = file.path(
+  #     folder_output,
+  #     sprintf("ABCpostChain_AR_%s_time=%d_chunk_size=%d_%s.RData", 
+  #     app_name, time_limit_minutes, chunk_size_AR, Sys.Date())
+  #   )
+  # )
+  # save(
+  #   PostMCMC, file = file.path(
+  #     folder_output,
+  #     sprintf("ABCpostChain_MCMC_%s_time=%d_chunk_size=%d_%s.RData", 
+  #     app_name, time_limit_minutes, chunk_size_MCMC, Sys.Date())
+  #   )
+  # )
   save(
     PostSMC, file = file.path(
       folder_output,
