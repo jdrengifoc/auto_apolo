@@ -58,7 +58,7 @@ get_posterior_time_limit <- function(
   p <- ifelse(model == 'cost', 1, -1)
   # Prepare data matrices
   X <- as.matrix(data$X)
-  X <- as.matrix(cbind(1, X))
+  # X <- as.matrix(cbind(1, X))
   y <- data$y
   N <- data$loc %>% dplyr::select(id) %>% unique() %>% nrow() %>% as.numeric()
   t <- data$loc %>% dplyr::select(time) %>% unique() %>% nrow() %>% as.numeric()
