@@ -181,8 +181,6 @@ get_posterior_time_limit <- function(
       # Check for NaNs in key variables
       if (any(is.nan(c(theta, deltai, etai, alphai, u, sigmaepsilon2, sigmaeta2, sigmaalpha2)))) {
         consecutive_na_count <- consecutive_na_count + 1
-	print("NA")
-	print(consecutive_na_count)
         if (consecutive_na_count > max_na_iterations) {
           cat("Reverting to last valid state at iteration:", valid_iters, "\n")
           theta    <- last_valid_state$theta + rnorm(length(last_valid_state$theta), 0, 1e-3)

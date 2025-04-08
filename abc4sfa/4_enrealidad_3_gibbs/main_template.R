@@ -45,11 +45,11 @@ sims <- names(ABC_sample[[scenario]])
 sims <- sims[grepl('sim', sims)]
 
 
-for (sim in sims) {
+for (sim in sims[1]) {
   data <- c(data_base, list(y = ABC_sample[[scenario]][[sim]]$y))
   postChain <- get_posterior_time_limit(
     data, model = "production", burnin_rate=0.3, time_limit_seconds = __time_limit_seconds__,
-    max_na_iterations = 5, fixed_beta = TRUE, thinning = 10
+    max_na_iterations = 5, fixed_beta = TRUE, thinning = 1
     )
   results[[sim]][['postChain']] <- postChain
   # Save results.
