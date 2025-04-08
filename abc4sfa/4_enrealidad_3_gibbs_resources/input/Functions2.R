@@ -73,7 +73,7 @@ get_posterior_time_limit <- function(
   b01 <- solve(t(X)%*%X)%*%t(X)%*%y %>% as.vector
   k <- length(b01)
   # Estimacion de cov por MCO.
-  B01 <- (1/(N*t-k))*crossprod(y - X%*%b01) * solve(t(X) %*% X)
+  B01 <- as.numeric((1/(N*t-k))*crossprod(y - X%*%b01)) * solve(t(X) %*% X)
   
   etai <- abs(rnorm(N, 0, sqrt(sigmaeta2)))
   eta <- matrix(etai, N, t, byrow = TRUE)
