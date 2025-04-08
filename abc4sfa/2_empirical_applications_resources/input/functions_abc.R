@@ -375,5 +375,5 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   # plot(PostSMC, main = paste("SMC ABC -", app_name))
   
   cat("ABC pipeline completed for application:", app_name, "\n")
-  return(list(PostAR = PostAR, PostMCMC = PostMCMC, PostSMC = PostSMC))
+  # return(list(PostAR = PostAR, PostMCMC = PostMCMC, PostSMC = PostSMC))
 }

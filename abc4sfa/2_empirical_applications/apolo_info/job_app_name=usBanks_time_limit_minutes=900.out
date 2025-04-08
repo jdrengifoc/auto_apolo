@@ -1,6 +1,6 @@
-Sun Apr  6 12:32:29 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
-Sun Apr  6 12:32:29 -05 2025: activando venv abc4sfa
-Sun Apr  6 12:32:29 -05 2025: Ejecutando Rscript abc4sfa/2_empirical_applications/jobs/main_app_name=usBanks_time_limit_minutes=900.R
+Mon Apr  7 21:14:38 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0
+Mon Apr  7 21:14:38 -05 2025: activando venv abc4sfa
+Mon Apr  7 21:14:38 -05 2025: Ejecutando Rscript abc4sfa/2_empirical_applications/jobs/main_app_name=usBanks_time_limit_minutes=900.R
 ===========================================
 Running ABC pipeline for application: usBanks 
 OLS regression summary:
