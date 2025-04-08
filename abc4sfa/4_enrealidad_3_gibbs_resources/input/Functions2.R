@@ -5,14 +5,12 @@ library(MASS)
 library(spdep)
 library(numDeriv)
 library(tmvtnorm)
-library(tidyverse)
 library(progress)
 library(coda)
 library(dplyr)
 library(future)
 library(furrr)
 library(progress)
-library(tmvtnorm)
 
 create_skewed <- function(Ri, sigmaepsilon2, sigmadelta2, lambdadelta) {
   function(x) {
@@ -55,9 +53,7 @@ get_posterior_time_limit <- function(
   data, model = 'cost', burnin_rate=0.3, time_limit_seconds = 60,
   max_na_iterations = 5, fixed_beta = TRUE, thinning = 10
   ) {
-  library(dplyr)
-  library(readr)
-  library(progress)
+  # library(readr)
   library(mvtnorm)  # for rmnorm
   p <- ifelse(model == 'cost', 1, -1)
   # Prepare data matrices
@@ -258,9 +254,7 @@ get_posterior_time_limit <- function(
 
 get_posterior <- function(data, model = 'cost', burnin=5e3, n_samples = 15000, 
                                      max_na_iterations = 5, fixed_beta = TRUE) {
-  library(dplyr)
-  library(readr)
-  library(progress)
+  #library(readr)
   library(mvtnorm)  # for rmnorm
   p <- ifelse(model == 'cost', 1, -1)
   # Prepare data matrices

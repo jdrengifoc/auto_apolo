@@ -11,7 +11,7 @@ data_path <- file.path(FOLDER_INPUT, "BK_empiricalData.RData")
 source(file.path(FOLDER_INPUT, "Functions2.R"))
 # Mejor s1 y peor s4 (s13 invertido), para halfnormal con código Miguel 
 distribution <- "hfn"
-scenario <- "__scenario__"
+scenario <- "s1"
 
 output_file <- file.path(
   FOLDER_OUTPUT,
@@ -48,7 +48,7 @@ sims <- sims[grepl('sim', sims)]
 for (sim in sims) {
   data <- c(data_base, list(y = ABC_sample[[scenario]][[sim]]$y))
   postChain <- get_posterior_time_limit(
-    data, model = "production", burnin_rate=0.3, time_limit_seconds = __time_limit_seconds__,
+    data, model = "production", burnin_rate=0.3, time_limit_seconds = 180,
     max_na_iterations = 5, fixed_beta = TRUE, thinning = 10
     )
   results[[sim]][['postChain']] <- postChain
