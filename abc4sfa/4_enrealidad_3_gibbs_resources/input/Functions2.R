@@ -236,6 +236,9 @@ get_posterior_time_limit <- function(
       cat("Warning message:", w$message, "\n")
     })
   }
+
+  # Remove any iterations that failed
+  results <- results_list[!sapply(results_list, is.null)]
   
   extract_results <- function(results, param) {
     do.call(cbind, lapply(results, function(res) res[[param]]))
