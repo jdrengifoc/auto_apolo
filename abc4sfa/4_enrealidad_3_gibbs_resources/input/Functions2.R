@@ -126,7 +126,9 @@ get_posterior_time_limit <- function(
         pp[1, 1] <- B2[1, 1]
         B2 <- pp
       }
-      theta <- t(rmnorm(1, b3, B2))
+
+      B2_pd <- as.matrix(nearPD(B2)$mat)
+      theta <- t(rmnorm(1, b3, B2_pd))
       if (fixed_beta) {
         theta[-1] <- last_valid_state$theta[-1]
       }
