@@ -44,3 +44,6 @@ F-statistic:  1602 on 19 and 1462 DF,  p-value: < 2.2e-16
 Observed summary statistics:
 [1]  2.444770e-18  1.246085e-02  6.762830e-03 -1.129532e-03  1.364566e-03
 Starting SMC ABC simulation...
+SMC chunk completed. Elapsed time: 30731.7 seconds
+SMC chunk completed. Elapsed time: 63961.8 seconds
+ABC pipeline completed for application: spainDairy 

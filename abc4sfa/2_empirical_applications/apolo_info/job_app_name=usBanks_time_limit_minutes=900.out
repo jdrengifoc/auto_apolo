@@ -61,3 +61,7 @@ F-statistic:  1105 on 36 and 1091 DF,  p-value: < 2.2e-16
 Observed summary statistics:
 [1] -2.076949e-18  2.734397e-02  2.271415e-02  1.845330e-03  1.143514e-02
 Starting SMC ABC simulation...
+SMC chunk completed. Elapsed time: 20080.8 seconds
+SMC chunk completed. Elapsed time: 40933 seconds
+SMC chunk completed. Elapsed time: 62367.3 seconds
+ABC pipeline completed for application: usBanks 
