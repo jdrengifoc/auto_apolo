@@ -114,7 +114,6 @@ get_posterior_time_limit <- function(
   valid_iters <- 0
   start_time_SMC <- Sys.time()
   while (as.numeric(difftime(Sys.time(), start_time_SMC, units = "secs")) < time_limit_seconds) {
-    print(valid_iters)
     tryCatch({
       Y <- as.vector(t(ym - delta - p*um))
       B2 <- chol2inv(chol((as.numeric(1/sigmaepsilon2) * crossprod(X, X) + B01)))
@@ -181,8 +180,7 @@ get_posterior_time_limit <- function(
       # Check for NaNs in key variables
       if (any(is.nan(c(theta, deltai, etai, alphai, u, sigmaepsilon2, sigmaeta2, sigmaalpha2)))) {
         consecutive_na_count <- consecutive_na_count + 1
-	print("NA")
-	print(consecutive_na_count)
+
         if (consecutive_na_count > max_na_iterations) {
           cat("Reverting to last valid state at iteration:", valid_iters, "\n")
           theta    <- last_valid_state$theta + rnorm(length(last_valid_state$theta), 0, 1e-3)
