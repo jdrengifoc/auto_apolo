@@ -1,0 +1,30 @@
+Loading required package: spData
+To access larger datasets in this package, install the spDataLarge
+package with: `install.packages('spDataLarge',
+repos='https://nowosad.github.io/drat/', type='source')`
+Loading required package: sf
+Linking to GEOS 3.12.2, GDAL 3.9.1, PROJ 9.4.1; sf_use_s2() is TRUE
+Loading required package: mvtnorm
+Loading required package: Matrix
+Loading required package: stats4
+Loading required package: gmm
+Loading required package: sandwich
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:MASS’:
+
+    select
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Error in solve.default(t(X) %*% X) : 
+  system is computationally singular: reciprocal condition number = 2.14486e-18
+Calls: get_posterior_time_limit ... %>% -> as.vector -> solve -> solve -> solve.default
+Execution halted

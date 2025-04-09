@@ -10,7 +10,7 @@ data_path <- file.path("abc4sfa/2_empirical_applications_resources/input", "BK_e
 source(file.path(FOLDER_INPUT, "Functions2.R"))
 
 distribution <- "hfn"
-app <- "__app__"
+app <- "usBanks"
 
 output_file <- file.path(
   FOLDER_OUTPUT,
@@ -23,7 +23,7 @@ results <- list()
 results[[app]] <- list()
 data <- readRDS(data_path)[[app]]
 postChain <- get_posterior_time_limit(
-  data, model = "cost", burnin_rate=0.3, time_limit_seconds = __time_limit_seconds__,
+  data, model = "cost", burnin_rate=0.3, time_limit_seconds = 900,
   max_na_iterations = 5, fixed_beta = TRUE, thinning = 10
   )
 results[[app]][['postChain']] <- postChain
