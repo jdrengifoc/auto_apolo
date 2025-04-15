@@ -2,7 +2,7 @@
 # MainIntegration_EasyABC_Pipeline.R
 # Set your working directory (adjust the path as needed)
 library(dplyr)
-FOLDER <- "abc4sfa/4_enrealidad_3_gibbs_resources"
+FOLDER <- "abc4sfa/3_gibbs_resources"
 FOLDER_OUTPUT <- file.path(FOLDER, "output")
 FOLDER_INPUT <- file.path(FOLDER, "input")
 data_path <- file.path("abc4sfa/2_empirical_applications_resources/input", "BK_empiricalData.RData")

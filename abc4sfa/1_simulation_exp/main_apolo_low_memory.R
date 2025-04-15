@@ -5,7 +5,7 @@ SETUP_FOLDER <- 'abc4sfa/setup'
 source(file.path(SETUP_FOLDER, 'requirements.R'))
 source(file.path(SETUP_FOLDER, 'functions.R'))
 
-FOLDER <- 'abc4sfa/1_simulation_hn_resources'
+FOLDER <- 'abc4sfa/1_simulation_resources'
 # Read inputs.
 # ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_Ystats.RData'))
 # ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_exp_Ystats.RData'))

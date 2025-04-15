@@ -1,7 +1,7 @@
 # Pipeline for Running ABC on Multiple Applications
 # MainIntegration_EasyABC_Pipeline.R
 # Set your working directory (adjust the path as needed)
-FOLDER <- "abc4sfa/4_enrealidad_3_gibbs_resources"
+FOLDER <- "abc4sfa/3_gibbs_resources"
 FOLDER_OUTPUT <- file.path(FOLDER, "output")
 FOLDER_INPUT <- file.path(FOLDER, "input")
 data_path <- file.path(FOLDER_INPUT, "BK_empiricalData.RData")
