@@ -308,7 +308,7 @@ run_ABC_pipeline <- function(app_name, data_path, formula_list, prior_list, mode
   save(
     PostSMC, file = file.path(
       folder_output,
-      sprintf("ABCpostChain_SMC_%s_time=%d_chunk_size=%d_%s.RData", 
+      sprintf("ABCpostChain_SMC_%s_time=%d_chunk_size=%d_%s_sa.RData", 
       app_name, time_limit_minutes, chunk_size_SMC, Sys.Date())
     )
   )
