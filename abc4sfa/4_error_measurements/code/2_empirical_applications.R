@@ -1,3 +1,7 @@
+
+# Requirements ------------------------------------------------------------
+
+
 library(dplyr)
 library(coda)
 library(stringr)
@@ -54,44 +58,9 @@ testthat::test_that('Check missings', {
   }
 })
 
-
-
-# Compare the results of the empirical applications for each pair of methods ----
-apps <- str_split_i(basename(files), '_', -1) %>% 
-  str_remove('\\..*') %>% unique
-  
-to_save <- list()
-for (app in apps) {
-  app_files <- files[str_detect(files, app)]
-  to_save[[app]] <- list()
-  
-  # For each pair of files.
-  for (file1 in app_files) {
-    for (file2 in app_files) {
-      i <- which(app_files == file1)
-      j <- which(app_files == file2)
-      
-      if (i >= j) next
-      method1 <- str_split_i(basename(file1), '_', -2)
-      method2 <- str_split_i(basename(file2), '_', -2)
-      sprintf("%s: %s Vs %s", app, method1, method2) %>% print
-      summary1 <- (load(file1) %>% get %>% mcmc %>% summary)$statistics
-      summary2 <- (load(file2) %>% get %>% mcmc %>% summary)$statistics
-      
-      absolute_dist <- summary1 - summary2
-      relative_dist <- (summary1 / summary2 - 1)
-      to_save[[app]][[sprintf("%s-%s", method1, method2)]] <- list(
-        relative_dist = relative_dist,
-        absolute_dist = absolute_dist
-      )
-    }
-  }
-}
-
-saveRDS(to_save, output_file)
-
-
-
+df %>% 
+  filter(method == 'SMC') %>% 
+  distinct(date, app, method) %>% View
 # Get data to plot  -------------------------------------------------------
 
 
@@ -199,6 +168,8 @@ library(scales)
 library(latex2exp)
 library(gridExtra)
 
+FIG_TYPE <- c('original', 'sensitive_analysis')[2]
+
 parameter_labels <- c(
   "sigma_v"      = TeX("$\\sigma_v$"),
   "sigma_alpha"  = TeX("$\\sigma_{\\alpha}$"),
@@ -209,9 +180,59 @@ parameter_labels <- c(
   "Lambda"       = TeX("$\\Lambda$")
 )
 
+filter_for_figures <- function(df, type) {
+  if (FIG_TYPE == 'original') {
+    df <- df %>% 
+      filter(between(date, ymd('2025-03-20'), ymd('2025-03-31')))
+  } else if (FIG_TYPE == 'sensitive_analysis') {
+    df <- df %>% 
+      filter(method == 'SMC', running_time == 1800) %>% 
+      mutate(method = if_else(date == last(date), 'sa', 'original'))
+  } else {
+    stop("Invalid type.")
+  }
+  
+  return(df)
+}
+path_for_figures <- function(folder, type, params_type) {
+  paths <- list(
+    sigmas = list(
+      original = 'empirical_applications_grid_sigmas.png',
+      sensitive_analysis = 'empirical_applications_grid_sigmas_sa.png'
+    ),
+    lambdas = list(
+      original = 'empirical_applications_grid_lambdas.png',
+      sensitive_analysis = 'empirical_applications_grid_lambdas_sa.png'
+    )
+  )
+ return(file.path(folder, paths[[params_type]][[type]]))
+}
+
+scale_color_manual_for_figures <- function(type) {
+  if (FIG_TYPE == 'original') {
+    scale_color_manual(
+      values = c(
+          "AR" = "#91B654", 
+          "MCMC" = "#9B006E", 
+          "SMC" = "#00929B"
+      )
+    ) 
+  } else if (FIG_TYPE == 'sensitive_analysis') {
+    scale_color_manual(
+      values = c(
+        "original" = "#A2A2A2", 
+        "sa" = "#00929B"
+      )
+    )
+  } else {
+    stop("Invalid type.")
+  }
+}
+
+
 df_plot_base <- df %>% 
   mutate(date = ymd(date)) %>% 
-  filter(between(date, ymd('2025-03-20'), ymd('2025-03-31'))) %>% 
+  filter_for_figures(FIG_TYPE) %>% 
   select(-beta0) %>% 
   # distinct(app, date, method, chunk_size, running_time)
   pivot_longer(
@@ -236,7 +257,7 @@ df_plot_base <- df %>%
 
 
 # Sigmas ------------------------------------------------------------------
-
+PLOT_BASE_FONT_SIZE <- 14
 df_plot <- df_plot_base %>% filter(str_detect(parameter, 'sigma'))
 fig_ir <- df_plot %>% 
   filter(app == 'IndonesianRice') %>% 
@@ -247,17 +268,11 @@ fig_ir <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = "", title = "Indonesian Rice")
 
@@ -270,17 +285,11 @@ fig_sp <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = "none",
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = "", title = "Spain Dairy")
 
@@ -293,17 +302,11 @@ fig_sr <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = 'Density', title = 'Swiss Railways')
 
@@ -316,22 +319,15 @@ fig_ub <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = "", title = 'US Banks')
 
-fig_ue <- df_plot %>% 
-  filter(app == 'USElectricity') %>% 
+fig_ue <- df_plot %>% filter(app == 'USElectricity') %>% 
   ggplot(aes(x = value, color = method)) +
   facet_wrap(
     ~ parameter, 
@@ -339,30 +335,27 @@ fig_ue <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  scale_y_continuous(
+    breaks = 
+      ) + 
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.title = element_blank(),
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = "Parameter Value", y = "", title = 'US Electricity')
 
 
-
 ggsave(
-  filename = 'abc4sfa/4_error_measurements/data/output/empirical_applications_grid_sigmas.png',
+  filename = path_for_figures(
+    folder = 'abc4sfa/4_error_measurements/data/output',
+    type = FIG_TYPE, params_type = 'sigmas'
+  ),
   plot = grid.arrange(fig_ir, fig_sp, fig_sr, fig_ub, fig_ue, nrow = 5),
   width = 18, height = 10, dpi = 300
   )
-
-
 # Lambdas -----------------------------------------------------------------
 
 df_plot <- df_plot_base %>% filter(!str_detect(parameter, 'sigma'))
@@ -376,17 +369,11 @@ fig_ir <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = "", title = "Indonesian Rice")
 
@@ -399,17 +386,11 @@ fig_sp <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = "none",
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = "", title = "Spain Dairy")
 
@@ -422,17 +403,11 @@ fig_sr <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = 'Density', title = 'Swiss Railways')
 
@@ -445,17 +420,11 @@ fig_ub <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = NULL, y = "", title = 'US Banks')
 
@@ -468,58 +437,28 @@ fig_ue <- df_plot %>%
     labeller = label_parsed
   ) + 
   geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
+  scale_color_manual_for_figures(FIG_TYPE) +
+  theme_minimal(PLOT_BASE_FONT_SIZE) + 
   theme(
     legend.title = element_blank(),
     legend.position = 'none',
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 1.25 * PLOT_BASE_FONT_SIZE)
   ) +
   labs(x = "Parameter Value", y = "", title = 'US Electricity')
 
 
 
 ggsave(
-  filename = 'abc4sfa/4_error_measurements/data/output/empirical_applications_grid_lambdas.png',
+  filename = path_for_figures(
+    folder = 'abc4sfa/4_error_measurements/data/output',
+    type = FIG_TYPE, params_type = 'lambdas'
+  ),
   plot = grid.arrange(fig_ir, fig_sp, fig_sr, fig_ub, fig_ue, nrow = 5),
   width = 18, height = 10, dpi = 300
 )
 
 
-# Just SMC ----------------------------------------------------------------
-
-df_plot %>% 
-  ggplot(aes(x = value, color = method)) +
-  facet_wrap(
-    ~ app + parameter, 
-    scales = "free", ncol = 7, 
-    labeller = label_parsed
-  ) + 
-  geom_density(linewidth = 0.35) +
-  scale_color_manual(
-    values = c(
-      "AR" = "#91B654", 
-      "MCMC" = "#9B006E", 
-      "SMC" = "#00929B"
-    )
-  ) +
-  theme_minimal() + 
-  theme(
-    legend.title = element_blank(),
-    legend.position = 'top',
-    strip.text = element_text(size = 10)
-  ) + 
-  labs(
-    y = 'Density', x = 'Parameter Value'
-  )
-
-# Plot credible intervals -------------------------------------------------
+# OLD: Plot credible intervals -------------------------------------------------
 
 df_ci %>% 
   bind_rows(df_priors %>% mutate(method = 'Prior')) %>% 

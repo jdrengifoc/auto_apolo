@@ -9,20 +9,22 @@ library(stringr)
 
 
 # Results halfnormal-normal GTRE ---------------------------------------------
-FOLDER <- 'abc4sfa/1_simulation_hn_resources'
+FOLDER <- 'abc4sfa/1_simulation_resources'
 ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_Ystats.RData'))
-files <- list.files(file.path(FOLDER, 'Data/Outputs'), full.names = T)
+inputData <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_simData.RData'))
+files <- list.files(
+  file.path(FOLDER, 'Data/Outputs'), full.names = T, pattern = '2025-04-06'
+  )
 output_file <- sprintf(
-  "abc4sfa/3_error_measurements/data/output/1_simulation_hn_results_%s.xlsx",
+  "abc4sfa/4_error_measurements/data/output/simulation_hn_misspecification_exp_%s.xlsx",
   Sys.Date()
 )
-
 #' It is also a common practice in ABC to perform a regression adjustment after 
 #' retained draws (Beaumont et al., 2002; Leuenberger and Wegmann, 2010;
 #' Sisson et al., 2018)
 # Preallocate.
 # Without adjustment.
-ID <- str_extract(list.files(files), 's\\d+')
+ID <- str_extract(files, 's\\d+')
 n_ids <- length(ID)
 RelativeBias <- matrix(0, n_ids, 3)
 UpperBias <- matrix(0, n_ids, 3)
@@ -39,13 +41,13 @@ s <- 1
 # For each scenario.
 for (id in ID){
   # Read results.
-  outputData <- readRDS(files[grep(sprintf("%s\\.", id), files)])
+  outputData <- readRDS(files[grep(sprintf("%s_", id), files)])
   
   # Extract real betas and covariates.
   X <- inputData[['X']]
   betas <- inputData[[id]]$params$beta
   # Extract simulations realized.
-  sims <- names(outputData[[1]])
+  sims <- names(outputData[[id]])
   nsim <- length(sims)
   # Fix inverted sigmas in experiments.
   sigmas <- rev(inputData[[id]]$params$sigma)
@@ -62,9 +64,6 @@ for (id in ID){
   RMSEsAdj <- matrix(0, nsim, 3)
   PCCsAdj <- matrix(0, nsim, 3)
   l <- 1
-  ##
-  id <- "s1"
-  ##
   for (sim in sims){
     y <- inputData[[id]][[sim]]$y
     # est_ABCparams <- outputData[[id]][[sim]]$ABCpostChain[1,]
