@@ -193,11 +193,10 @@ for (scenario in scenarios) {
   file_abc <- files_abc[str_extract(files_abc, 's\\d+') == scenario]
   abc_data <- readRDS(file_abc)
   sigmas_est_abc <- sapply(
-    abc_data[[scenario]], 
-    function(sim) {get_abc_sigmas(sim$sumary$mean_ABC)}
+    abc_data[[scenario]], function(sim) {get_abc_sigmas(sim)}
   )
   relative_bias_abc <- apply(sigmas_est_abc / sigmas - 1, 1, mean)
-  root_mse_abc <- apply((sigmas_est_abc - sigmas)^2, 1, mean)
+  root_mse_abc <- apply((sigmas_est_abc - sigmas)^2, 1, mean) %>% sqrt
   
   # Gibbs
   file_gibbs <- files_gibbs[str_extract(files_gibbs, 's\\d+') == scenario]
@@ -208,7 +207,7 @@ for (scenario in scenarios) {
       gibbs_data, function(sim) {get_gibbs_sigmas(sim$postChain)}
     )
     relative_bias_gibbs <- apply(sigmas_est_gibbs / sigmas - 1, 1, mean)
-    root_mse_gibbs <- apply((sigmas_est_gibbs - sigmas)^2, 1, mean)
+    root_mse_gibbs <- apply((sigmas_est_gibbs - sigmas)^2, 1, mean) %>% sqrt
   } else {
     relative_bias_gibbs <- NULL
     root_mse_gibbs <- NULL

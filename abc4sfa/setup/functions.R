@@ -848,8 +848,8 @@ get_gibbs_sigmas <- function(gibbs_results) {
   return(sigmas_gibbs)
 }
 
-get_abc_sigmas <- function(est_ABCparams) {
-  sigmas_abc <- est_ABCparams[2:5]
+get_abc_sigmas <- function(sim_abc) {
+  sigmas_abc <- sim_abc$sumary$mean_ABC[2:5]
   
   return(sigmas_abc)
 }

@@ -1,7 +1,7 @@
+setwd('auto_apolo/')
 rm(list = ls())
 set.seed(010101)
 
-setwd('auto_apolo/')
 SETUP_FOLDER <- 'abc4sfa/setup'
 source(file.path(SETUP_FOLDER, 'requirements.R'))
 source(file.path(SETUP_FOLDER, 'functions.R'))
@@ -36,14 +36,16 @@ for (scenario in scenarios){
 
   est_sigmas <- NULL
   for (sim in sims){
-    est_ABCparams <- apply(outputData[[scenario]][[sim]]$ABCpostChain, 2, mean)
-    est_sigmas <- bind_rows(est_sigmas, get_abc_sigmas(est_ABCparams))
+    est_sigmas <- rbind(
+      est_sigmas, 
+      get_abc_sigmas(outputData[[scenario]][[sim]])
+      )
   }
   df0 <- rbind(
     sigmas,
     colMeans(est_sigmas),
     colMeans(abs(est_sigmas / sigmas - 1)),
-    colMeans((est_sigmas - sigmas)^2)
+    colMeans((est_sigmas - sigmas)^2) %>% sqrt
   ) %>% as_tibble() %>% 
     rename(sigma_u = 1, sigma_eta = 2, sigma_v = 3, sigma_alpha = 4) %>% 
     mutate(
