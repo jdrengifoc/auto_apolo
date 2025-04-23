@@ -58,9 +58,6 @@ testthat::test_that('Check missings', {
   }
 })
 
-df %>% 
-  filter(method == 'SMC') %>% 
-  distinct(date, app, method) %>% View
 # Get data to plot  -------------------------------------------------------
 
 
@@ -169,6 +166,7 @@ library(latex2exp)
 library(gridExtra)
 
 FIG_TYPE <- c('original', 'sensitive_analysis')[2]
+PLOT_BASE_FONT_SIZE <- 14
 
 parameter_labels <- c(
   "sigma_v"      = TeX("$\\sigma_v$"),
@@ -256,8 +254,7 @@ df_plot_base <- df %>%
   )
 
 
-# Sigmas ------------------------------------------------------------------
-PLOT_BASE_FONT_SIZE <- 14
+# FIGURE: Sigmas -----------------------------------------------------------
 df_plot <- df_plot_base %>% filter(str_detect(parameter, 'sigma'))
 fig_ir <- df_plot %>% 
   filter(app == 'IndonesianRice') %>% 
@@ -353,13 +350,11 @@ ggsave(
     folder = 'abc4sfa/4_error_measurements/data/output',
     type = FIG_TYPE, params_type = 'sigmas'
   ),
-  plot = grid.arrange(fig_ir, fig_sp, fig_sr, fig_ub, fig_ue, nrow = 5),
+  plot = grid.arrange(fig_ub, fig_sr, fig_sp, fig_ue, fig_ir, nrow = 5),
   width = 18, height = 10, dpi = 300
   )
-# Lambdas -----------------------------------------------------------------
-
+# FIGURE: Lambdas -----------------------------------------------------------
 df_plot <- df_plot_base %>% filter(!str_detect(parameter, 'sigma'))
-
 fig_ir <- df_plot %>% 
   filter(app == 'IndonesianRice') %>% 
   ggplot(aes(x = value, color = method)) +
@@ -453,12 +448,77 @@ ggsave(
     folder = 'abc4sfa/4_error_measurements/data/output',
     type = FIG_TYPE, params_type = 'lambdas'
   ),
-  plot = grid.arrange(fig_ir, fig_sp, fig_sr, fig_ub, fig_ue, nrow = 5),
+  plot = grid.arrange(fig_ub, fig_sr, fig_sp, fig_ue, fig_ir, nrow = 5),
   width = 18, height = 10, dpi = 300
 )
 
 
-# OLD: Plot credible intervals -------------------------------------------------
+
+# Table -------------------------------------------------------------------
+
+
+sig_level <- 0.05
+df <- NULL
+
+apps <- str_split_i(basename(files), '_', 3) %>% 
+  str_remove('\\..*') %>% unique
+
+to_save <- list()
+for (app in apps) {
+  app_files <- files[str_detect(files, app)]
+  to_save[[app]] <- list()
+  
+  # For each pair of files.
+  for (file in app_files) {
+    method <- str_split_i(basename(file), '_', 2)
+    running_time <- str_split_i(basename(file), '_', 4) %>% 
+      str_remove('.*=') %>% as.integer()
+    chunk_size <- str_split_i(basename(file), '_', 6) %>% 
+      str_remove('.*=') %>% as.integer()
+    saving_date <- basename(file) %>% str_extract('\\d{4}-\\d{2}-\\d{2}')
+  
+    chains <- load(file) %>% get %>% as_tibble()
+    names(chains) <- c('beta0', 'sigma_v', 'sigma_alpha', 
+                       'sigma_eta', 'sigma_u')
+    chains <- chains %>% 
+      mutate(
+        # date = saving_date, app = app, 
+        # method = method, running_time = running_time, chunk_size = chunk_size,
+        lambda = sigma_u / sigma_v,
+        lambda_delta = sigma_eta / sigma_alpha,
+        Lambda = sigma_eta / sigma_u
+      )
+    
+    chains <- (chains %>% mcmc %>% summary)$statistics %>% 
+      as_tibble(.name_repair = 'universal') %>% 
+      select(-Naive.SE) %>% 
+      mutate(
+        date = saving_date, app = app,
+        method = method, running_time = running_time, chunk_size = chunk_size,
+        parameter = c(
+          'beta0', 'sigma_v', 'sigma_alpha', 'sigma_eta', 'sigma_u', 
+          'lambda', 'lambda_delta', 'Lambda'
+          )
+      ) %>% relocate(date, app, method, running_time, chunk_size, parameter)
+    
+    df <- bind_rows(df, chains)
+  }
+}
+
+
+df %>% 
+  mutate(date = ymd(date)) %>% 
+  filter_for_figures(FIG_TYPE) %>% 
+  filter(parameter != "beta0") %>% 
+  pivot_wider(
+    id_cols = c(date, app, running_time, parameter),
+    names_from = method,
+    values_from = c(Mean, SD, Time.series.SE),
+    names_glue = "{method}_{.value}"
+  ) %>% 
+  writexl::write_xlsx(file.path('abc4sfa/4_error_measurements/data/output/table_apps_posteriors.xlsx'))
+
+# OLD: Plot credible intervals ----------------------------------------------
 
 df_ci %>% 
   bind_rows(df_priors %>% mutate(method = 'Prior')) %>% 

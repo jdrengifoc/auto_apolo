@@ -7,7 +7,6 @@ source(file.path(SETUP_FOLDER, 'functions.R'))
 library(mvtnorm)
 library(stringr)
 
-
 # Results halfnormal-normal GTRE ---------------------------------------------
 FOLDER <- 'abc4sfa/1_simulation_resources'
 ABC_inputs <- readRDS(file.path(FOLDER, 'Data/Inputs/BK_Ystats.RData'))

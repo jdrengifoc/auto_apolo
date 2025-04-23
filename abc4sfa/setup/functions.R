@@ -830,7 +830,76 @@ inv <- function(x){
   return(c(xinv,  overallEf))
 }
 
+# Parser
+get_real_sigmas <- function(input_data, scenario) {
+  sigmas <- input_data[[scenario]]$params$sigma %>% rev
+  
+  return(sigmas)
+}
 
+get_gibbs_sigmas <- function(gibbs_results) {
+  sigmas_gibbs <- c(
+    mean((gibbs_results$sigmaepsilon2chain)),
+    mean((gibbs_results$sigmaalpha2chain)),
+    mean((gibbs_results$sigmau2chain)),
+    mean((gibbs_results$sigmaeta2chain))
+  ) %>% rev
+  
+  return(sigmas_gibbs)
+}
+
+get_abc_sigmas <- function(est_ABCparams) {
+  sigmas_abc <- est_ABCparams[2:5]
+  
+  return(sigmas_abc)
+}
+
+
+get_metrics_efficiency <- function(efficiencies_ls, name_real, name_est) {
+  sapply(
+    efficiencies_ls,
+    function(sim) {
+      TE_real <- sim[[name_real]] %>% 
+        apply(2, function(x) {
+          x[x == 0] <- mean(x[x != 0])
+          x
+        })
+      TE_est <- sim[[name_est]]
+      t <- dim(TE_real)[2] - 1
+      
+      TE_real <- cbind(TE_real, TE_real[, 1] * TE_real[, 2:(t+1)])
+      TE_est <- cbind(TE_est, TE_est[, 1] * TE_est[, 2:(t+1)])
+      
+      ts_trans <- 2:(t+1)
+      ts_overall <- (t+2):(2*t+1)
+      # Compute overall efficiency
+      EF_real <- cbind(
+        TE_real, TE_real[, 1] * TE_real[, 2:(t+1)]
+      )
+      EF_est <- cbind(
+        TE_est, TE_est[, 1] * TE_est[, 2:dim(TE_est)[2]]
+      )
+      
+      c(
+        relative_bias_perm = mean(EF_est[, 1] / EF_real[, 1] - 1),
+        relative_bias_trans = mean(
+          c(EF_est[, ts_trans]) / c(EF_real[, ts_trans]) - 1
+        ),
+        relative_bias_overall = mean(
+          c(EF_est[, ts_overall]) / c(EF_real[, ts_overall]) - 1
+        ),
+        
+        cor_perm = cor(EF_est[, 1], EF_real[, 1]),
+        cor_trans = cor(c(EF_est[, ts_trans]), c(EF_real[, ts_trans])),
+        cor_overall = cor(c(EF_est[, ts_overall]), c(EF_real[, ts_overall])),
+        
+        rootmse_perm = mean((EF_est[, 1] - EF_real[, 1])^2) %>% sqrt,
+        rootmse_trans = mean((c(EF_est[, ts_trans]) - c(EF_real[, ts_trans]))^2) %>% sqrt,
+        rootmse_overall = mean((c(EF_est[, ts_overall]) - c(EF_real[, ts_overall]))^2) %>% sqrt
+      )
+    }
+  ) %>% apply(1, mean)
+}
 # Metropolis-Hasting ------------------------------------------------------
 inputsMH <- function(residuals, t_periods, variances) {
   sv <- variances[["sigma_v"]]
@@ -893,3 +962,17 @@ uDrawMH <- function(inputs_MH, residuals, t_periods, variances, tun = 1) {
   inputs_MH$accept <- c(inputs_MH$accept, accept)
   return(inputs_MH)
 }
+
+
+# Bendito seas ------------------------------------------------------------
+
+fix_inverted_ids <- function(df) {
+  df %>% 
+    left_join(
+      readxl::read_excel('abc4sfa/1_simulation_resources/Data/Inputs/Badunenko&Kumbhakar.xlsx') %>%
+        select(scenario = ID, ID_inverted),
+      by = 'scenario'
+    ) %>% select(-scenario) %>% relocate(scenario = ID_inverted)
+}
+
+
