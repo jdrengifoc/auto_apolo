@@ -37,10 +37,7 @@ fmla <- formula(
 )
 data$X <- model.matrix(fmla, data = data$X) %>% as_tibble()
 
-postChain <- get_posterior_time_limit(
-  data, model = "cost", burnin_rate=0.3, time_limit_seconds = __time_limit_seconds__,
-  max_na_iterations = 5, fixed_beta = TRUE, thinning = 10
-  )
+postChain <- get_posterior(data, model = "cost", burnin=3e5, n_samples=1e6, thinning=20)
 results[[app]][['postChain']] <- postChain
 # Save results.
 saveRDS(results, output_file)
