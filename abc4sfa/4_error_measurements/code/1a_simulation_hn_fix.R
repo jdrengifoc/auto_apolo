@@ -1,5 +1,6 @@
 
 # Requirements ------------------------------------------------------------
+setwd('auto_apolo')
 rm(list = ls())
 set.seed(010101)
 
@@ -8,6 +9,7 @@ source(file.path(SETUP_FOLDER, 'requirements.R'))
 source(file.path(SETUP_FOLDER, 'functions.R'))
 library(mvtnorm)
 library(dplyr)
+library(stringr)
 
 # Globals -----------------------------------------------------------------
 FOLDER_INPUT <- "abc4sfa/1_simulation_resources/Data/Inputs/"
@@ -77,7 +79,6 @@ for (scenario in scenarios) {
       TE_real = t(sapply(TI_real, inv))[, 1:(Ts+1)],
       TE_est = t(sapply(TI_est, inv))[, 1:(Ts+1)]
     )
-    names(ls0) <- sim
     efficiency_abc[[scenario]][[sim]] <- ls0
     print(Sys.time() - tic)
   }
@@ -92,6 +93,89 @@ efficiency_abc %>%
     )
   )
 
+# Gibbs: Efficiency --------------------------------------------------------
+
+
+media <- function(x) {
+  mean(x, na.rm = TRUE)
+}
+
+# Parameters
+p <- 1L
+
+# Read data.
+files <- list.files(FOLDER_GIBBS, full.names = T)
+
+efficiency_abc <- list()
+for (file in files) {
+  data <- readRDS(file)
+  sims <- names(data)
+  scenario <- stringr::str_extract(file, "s\\d+")
+  # Extract params.
+  params <- INPUT_DATA[[scenario]]$params
+  n <- params$n
+  t <- params$t
+  X <- INPUT_DATA$X
+  betas <- INPUT_DATA[[scenario]]$params$beta
+  sigmas <- get_real_sigmas(INPUT_DATA, scenario)
+  
+  efficiency_abc[[scenario]] <- list()
+  for (sim in sims[1:5]) {
+    tic <- Sys.time()
+    message("Scenario ", scenario, ". Simulation: ", sim)
+    # Read sim related input/outputs.
+    y <- INPUT_DATA[[scenario]][[sim]]$y
+    gibbs_results <- data[[sim]][['postChain']]
+    sigmas_gibbs <- get_gibbs_sigmas(gibbs_results)
+    betas_gibbs <- apply(gibbs_results$Thetachain, 1L, mean)
+    
+    TI_real <- ColombiExpectation(n, t, y, X, betas, sigmas, p)
+    TI_gibbs <- ColombiExpectation(n, t, y, X, betas_gibbs, sigmas_gibbs, p)
+    
+    ls0 <- list(
+      TE_real = t(sapply(TI_real, inv))[, 1:(t+1)],
+      TE_est = t(sapply(TI_gibbs, inv))[, 1:(t+1)]
+    )
+    efficiency_abc[[scenario]][[sim]] <- ls0
+    print(Sys.time() - tic)
+  }
+}
+# Save data.
+scenarios <- stringr::str_extract(files, "s[0-9]+")
+(df <- data.frame(
+  scenario = scenarios,
+  RelativeBiasPerm = RelativeBias[,1],
+  RelativeBiasTrans = RelativeBias[,2],
+  RelativeBiasAll= RelativeBias[,3],
+  UpperBiasPerm = UpperBias[,1],
+  UpperBiasTrans = UpperBias[,2],
+  UpperBiasAll = UpperBias[,3],
+  PearsonCorrCoefPerm = PearsonCorrCoef[,1],
+  PearsonCorrCoefTrans = PearsonCorrCoef[,2],
+  PearsonCorrCoefAll = PearsonCorrCoef[,3],
+  RelativeMSEPerm = RelativeMSE[,1],
+  RelativeMSETrans = RelativeMSE[,2],
+  RelativeMSEAll = RelativeMSE[,3]
+))
+
+tibble(
+  scenario = rep(scenarios, each = 3),
+  efficiency_type = rep(c('Persistent', 'Transient', 'Overall'), times = length(scenarios)),
+  relative_bias = c(t(RelativeBias)),
+  pearson_correlation = c(t(PearsonCorrCoef)),
+  relative_MSE = c(t(RelativeMSE))
+) %>% 
+  pivot_longer(
+    cols = c('relative_bias', 'pearson_correlation', 'relative_MSE'),
+    names_to = 'metric_type', values_to = 'metric_value'
+  ) %>%
+  fix_inverted_ids
+  writexl::write_xlsx(
+    sprintf("%s/efficiency_metrics_gibbs_hf_%s.xlsx", FOLDER_OUTPUT, Sys.Date())
+  )
+
+
+
 # ABC + Gibbs: Sigmas -------------------------------------------------------------
 
 scenarios <- paste0('s', c(1, 14))
@@ -103,7 +187,7 @@ df <- NULL
 scenario <- scenarios[1]
 for (scenario in scenarios) {
   # Ground
-  sigmas <- INPUT_DATA[[scenario]]$params$sigma
+  sigmas <- get_real_sigmas(INPUT_DATA, scenario)
   
   # ABC.
   file_abc <- files_abc[str_extract(files_abc, 's\\d+') == scenario]
@@ -151,11 +235,7 @@ for (scenario in scenarios) {
 }
 
 df %>% 
-  left_join(
-    readxl::read_excel('abc4sfa/1_simulation_resources/Data/Inputs/Badunenko&Kumbhakar.xlsx') %>%
-      select(scenario = ID, ID_inverted),
-    by = 'scenario'
-  ) %>% relocate(ID_inverted) %>% 
+  fix_inverted_ids %>% 
   writexl::write_xlsx(
     sprintf(
       "%s/sigmas_metrics_hf_%s.xlsx",

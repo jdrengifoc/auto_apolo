@@ -839,10 +839,10 @@ get_real_sigmas <- function(input_data, scenario) {
 
 get_gibbs_sigmas <- function(gibbs_results) {
   sigmas_gibbs <- c(
-    mean((gibbs_results$sigmaepsilon2chain)),
-    mean((gibbs_results$sigmaalpha2chain)),
-    mean((gibbs_results$sigmau2chain)),
-    mean((gibbs_results$sigmaeta2chain))
+    mean(sqrt(gibbs_results$sigmaepsilon2chain)),
+    mean(sqrt(gibbs_results$sigmaalpha2chain)),
+    mean(sqrt(gibbs_results$sigmau2chain)),
+    mean(sqrt(gibbs_results$sigmaeta2chain))
   ) %>% rev
   
   return(sigmas_gibbs)
