@@ -40,6 +40,9 @@ df %>%
     metric_name = str_remove(metric_name, "_[^_]*$")
   ) %>% relocate(scenario, efficiency_type, metric_name, metric_value) %>% 
   fix_inverted_ids %>% 
+  mutate(pp = str_extract(scenario, '\\d+') %>% as.integer) %>% 
+  arrange(pp) %>% select(-pp) %>% 
+  pivot_wider(names_from = 'scenario', values_from = 'metric_value') %>% 
   writexl::write_xlsx(
     sprintf(
       "%s/efficiency_metrics_abc_tun_exp_%s.xlsx",

@@ -854,8 +854,18 @@ get_abc_sigmas <- function(sim_abc) {
   return(sigmas_abc)
 }
 
+cor_na_rm <- function(x1, x2, na.rm = T) {
+  n <- sum(!is.na(x1 + x2))
+  mean(
+    (x1 - mean(x1, na.rm = na.rm)) * (x2 - mean(x2, na.rm = na.rm)),
+    na.rm = na.rm
+  ) / 
+    (sd(x1, na.rm = na.rm) * sd(x2, na.rm = na.rm)) * n / (n - 1)
+}
+
 
 get_metrics_efficiency <- function(efficiencies_ls, name_real, name_est) {
+  
   sapply(
     efficiencies_ls,
     function(sim) {
@@ -880,25 +890,43 @@ get_metrics_efficiency <- function(efficiencies_ls, name_real, name_est) {
         TE_est, TE_est[, 1] * TE_est[, 2:dim(TE_est)[2]]
       )
       
+      EF_perm_est <- EF_est[, 1]
+      EF_perm_real <- EF_real[, 1]
+      idx_clean <- !is.na(EF_perm_est + EF_perm_real) & 
+        !is.infinite(EF_perm_est + EF_perm_real)
+      EF_perm_est <- EF_perm_est[idx_clean]
+      EF_perm_real <- EF_perm_real[idx_clean]
+      
+      
+      EF_trans_est <- c(EF_est[, ts_trans])
+      EF_trans_real <- c(EF_real[, ts_trans])
+      idx_clean <- !is.na(EF_trans_est + EF_trans_real) &
+        !is.infinite(EF_trans_est + EF_trans_real)
+      EF_trans_est <- EF_trans_est[idx_clean]
+      EF_trans_real <- EF_trans_real[idx_clean]
+      
+      EF_overall_est <- c(EF_est[, ts_overall])
+      EF_overall_real <- c(EF_real[, ts_overall])
+      idx_clean <- !is.na(EF_overall_est + EF_overall_real) &
+        !is.infinite(EF_overall_est + EF_overall_real)
+      EF_overall_est <- EF_overall_est[idx_clean]
+      EF_overall_real <- EF_overall_real[idx_clean]
+      
       c(
-        relative_bias_perm = mean(EF_est[, 1] / EF_real[, 1] - 1),
-        relative_bias_trans = mean(
-          c(EF_est[, ts_trans]) / c(EF_real[, ts_trans]) - 1
-        ),
-        relative_bias_overall = mean(
-          c(EF_est[, ts_overall]) / c(EF_real[, ts_overall]) - 1
-        ),
+        relative_bias_perm = mean(EF_perm_est / EF_perm_real - 1),
+        relative_bias_trans = mean(EF_trans_est / EF_trans_real - 1),
+        relative_bias_overall = mean(EF_overall_est / EF_overall_real - 1),
         
-        cor_perm = cor(EF_est[, 1], EF_real[, 1]),
-        cor_trans = cor(c(EF_est[, ts_trans]), c(EF_real[, ts_trans])),
-        cor_overall = cor(c(EF_est[, ts_overall]), c(EF_real[, ts_overall])),
+        cor_perm = cor(EF_perm_est, EF_perm_real),
+        cor_trans = cor(EF_trans_est, EF_trans_real),
+        cor_overall = cor(EF_overall_est, EF_overall_real),
         
-        rootmse_perm = mean((EF_est[, 1] - EF_real[, 1])^2) %>% sqrt,
-        rootmse_trans = mean((c(EF_est[, ts_trans]) - c(EF_real[, ts_trans]))^2) %>% sqrt,
-        rootmse_overall = mean((c(EF_est[, ts_overall]) - c(EF_real[, ts_overall]))^2) %>% sqrt
+        rootmse_perm = mean((EF_perm_est - EF_perm_real)^2) %>% sqrt,
+        rootmse_trans = mean((EF_trans_est - EF_trans_real)^2) %>% sqrt,
+        rootmse_overall = mean((EF_overall_est - EF_overall_real)^2) %>% sqrt
       )
     }
-  ) %>% apply(1, mean)
+  ) %>% apply(1, function(x) {mean(x, na.rm = T)})
 }
 # Metropolis-Hasting ------------------------------------------------------
 inputsMH <- function(residuals, t_periods, variances) {

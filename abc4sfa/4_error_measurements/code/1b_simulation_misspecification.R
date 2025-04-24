@@ -57,8 +57,6 @@ for (scenario in scenarios){
   df <- bind_rows(df, df0)
 }
 
-df %>% 
-  fix_inverted_ids %>% 
-  writexl::write_xlsx(output_file)
+df %>% fix_inverted_ids %>% writexl::write_xlsx(output_file)
 
 

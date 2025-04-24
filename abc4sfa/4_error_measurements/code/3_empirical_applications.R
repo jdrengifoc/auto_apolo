@@ -1,3 +1,4 @@
+setwd('auto_apolo/')
 
 # Requirements ------------------------------------------------------------
 
@@ -42,13 +43,15 @@ theme4policies <- function(base_size = 16, base_family = "serif") {
 }
 
 
-setwd('auto_apolo/')
+
 folder <- "abc4sfa/2_empirical_applications_resources/output"
 files <- list.files(folder, "RData", full.names = T)
 output_file <- sprintf(
-  "abc4sfa/3_error_measurements/data/output/2_empirical_applications_%s.rds",
+  "abc4sfa/4_error_measurements/data/output/2_empirical_applications_%s.rds",
   Sys.Date()
 )
+
+FOLDER_OUTPUT <- 'abc4sfa/4_error_measurements/data/output/empirical_applications'
 
 testthat::test_that('Check missings', {
   for (file in files) {
@@ -165,14 +168,14 @@ library(scales)
 library(latex2exp)
 library(gridExtra)
 
-FIG_TYPE <- c('original', 'sensitive_analysis')[2]
+FIG_TYPE <- c('original', 'sensitive_analysis')[1]
 PLOT_BASE_FONT_SIZE <- 14
 
 parameter_labels <- c(
   "sigma_v"      = TeX("$\\sigma_v$"),
   "sigma_alpha"  = TeX("$\\sigma_{\\alpha}$"),
   "sigma_eta"    = TeX("$\\sigma_{\\eta}$"),
-  "sigma_u"      = TeX("$\\sigma_u$"),
+  "sigma_u"      = TeX("$\\sigma_w$"),
   "lambda"       = TeX("$\\lambda$"),
   "lambda_delta" = TeX("$\\lambda_{\\delta}$"),
   "Lambda"       = TeX("$\\Lambda$")
@@ -347,7 +350,7 @@ fig_ue <- df_plot %>% filter(app == 'USElectricity') %>%
 
 ggsave(
   filename = path_for_figures(
-    folder = 'abc4sfa/4_error_measurements/data/output',
+    folder = FOLDER_OUTPUT,
     type = FIG_TYPE, params_type = 'sigmas'
   ),
   plot = grid.arrange(fig_ub, fig_sr, fig_sp, fig_ue, fig_ir, nrow = 5),
@@ -445,7 +448,7 @@ fig_ue <- df_plot %>%
 
 ggsave(
   filename = path_for_figures(
-    folder = 'abc4sfa/4_error_measurements/data/output',
+    folder = FOLDER_OUTPUT,
     type = FIG_TYPE, params_type = 'lambdas'
   ),
   plot = grid.arrange(fig_ub, fig_sr, fig_sp, fig_ue, fig_ir, nrow = 5),
@@ -455,8 +458,11 @@ ggsave(
 
 
 # Table -------------------------------------------------------------------
-
-
+files <- list.files(folder, "RData", full.names = T)
+files <- files[
+  str_extract(files, '\\d{4}-\\d{2}-\\d{2}') %>% ymd %>% 
+    between(ymd('2025-03-20'), ymd('2025-03-31'))
+]
 sig_level <- 0.05
 df <- NULL
 
@@ -482,8 +488,6 @@ for (app in apps) {
                        'sigma_eta', 'sigma_u')
     chains <- chains %>% 
       mutate(
-        # date = saving_date, app = app, 
-        # method = method, running_time = running_time, chunk_size = chunk_size,
         lambda = sigma_u / sigma_v,
         lambda_delta = sigma_eta / sigma_alpha,
         Lambda = sigma_eta / sigma_u
@@ -507,8 +511,10 @@ for (app in apps) {
 
 
 df %>% 
-  mutate(date = ymd(date)) %>% 
-  filter_for_figures(FIG_TYPE) %>% 
+  mutate(
+    date = ymd(date),
+    parameter = if_else(parameter == 'sigma_u', 'sigma_w', parameter)
+    ) %>% 
   filter(parameter != "beta0") %>% 
   pivot_wider(
     id_cols = c(date, app, running_time, parameter),
@@ -516,7 +522,7 @@ df %>%
     values_from = c(Mean, SD, Time.series.SE),
     names_glue = "{method}_{.value}"
   ) %>% 
-  writexl::write_xlsx(file.path('abc4sfa/4_error_measurements/data/output/table_apps_posteriors.xlsx'))
+  writexl::write_xlsx(file.path(FOLDER_OUTPUT, 'table_apps_posteriors.xlsx'))
 
 # OLD: Plot credible intervals ----------------------------------------------
 
