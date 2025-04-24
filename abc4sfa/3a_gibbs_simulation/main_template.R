@@ -20,8 +20,8 @@ output_file <- file.path(
 
 FOLDER_fixed <- "abc4sfa/1_simulation_hn_resources"
 # Read data.
-ABC_sample <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/sims_exp/BK_simData.RData'))
-ABC_inputs <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/sims_exp/BK_Ystats.RData'))[[scenario]][['params']]
+ABC_sample <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_simData.RData'))
+ABC_inputs <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_Ystats.RData'))[[scenario]][['params']]
 # if (distribution == 'hn') {
 #   ABC_sample <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_simData.RData'))
 #   ABC_inputs <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_Ystats.RData'))[[scenario]][['params']]
