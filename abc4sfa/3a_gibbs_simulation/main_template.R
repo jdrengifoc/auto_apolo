@@ -28,7 +28,7 @@ ABC_inputs <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_Ystats.RData'))[[s
 # } else {
 #   ABC_sample <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_exp_simData.RData'))
 #   ABC_inputs <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_exp_Ystats.RData'))[[scenario]][['params']]
-}
+# }
 
 # Process data for `get_posterior()`
 data_base <- list(
