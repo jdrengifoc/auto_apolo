@@ -18,7 +18,7 @@ output_file <- file.path(
 
 # run ---------------------------------------------------------------------
 
-FOLDER_fixed <- "abc4sfa/1_simulation_hn_resources"
+FOLDER_fixed <- "abc4sfa/1_simulation_resources"
 # Read data.
 ABC_sample <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_simData.RData'))
 ABC_inputs <- readRDS(file.path(FOLDER_fixed, 'Data/Inputs/BK_Ystats.RData'))[[scenario]][['params']]
