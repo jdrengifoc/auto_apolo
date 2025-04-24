@@ -37,7 +37,7 @@ fmla <- formula(
 )
 data$X <- model.matrix(fmla, data = data$X) %>% as_tibble()
 
-postChain <- get_posterior(data, model = "cost", burnin=3e5, n_samples=1e6, thinning=20)
+postChain <- get_posterior(data, model = "cost", burnin=3.9e5, n_samples=1.3e6, thinning=20)
 results[[app]][['postChain']] <- postChain
 # Save results.
 saveRDS(results, output_file)
