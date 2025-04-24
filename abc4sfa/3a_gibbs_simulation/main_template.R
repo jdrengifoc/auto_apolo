@@ -8,8 +8,8 @@ data_path <- file.path(FOLDER_INPUT, "BK_empiricalData.RData")
 
 source(file.path(FOLDER_INPUT, "Functions2.R"))
 
-distribution <- "__distribution__"
 scenario <- "__scenario__"
+distribution <- "hn"
 
 output_file <- file.path(
   FOLDER_OUTPUT,
