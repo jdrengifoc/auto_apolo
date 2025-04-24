@@ -6,18 +6,15 @@ FOLDER_OUTPUT <- file.path(FOLDER, "output")
 FOLDER_INPUT <- file.path(FOLDER, "input")
 data_path <- file.path(FOLDER_INPUT, "BK_empiricalData.RData")
 
-
-# Source your helper functions.
 source(file.path(FOLDER_INPUT, "Functions2.R"))
-# Mejor s1 y peor s4 (s13 invertido), para halfnormal con código Miguel 
-distribution <- "hfn"
+
+distribution <- "__distribution__"
 scenario <- "__scenario__"
 
 output_file <- file.path(
   FOLDER_OUTPUT,
   sprintf("Gibbs_experiment_%s_%s_%s.RData", distribution, scenario, Sys.Date())
 )
-
 
 # run ---------------------------------------------------------------------
 
@@ -44,15 +41,13 @@ results <- list()
 sims <- names(ABC_sample[[scenario]])
 sims <- sims[grepl('sim', sims)]
 
-
 for (sim in sims) {
   data <- c(data_base, list(y = ABC_sample[[scenario]][[sim]]$y))
-  postChain <- get_posterior_time_limit(
-    data, model = "production", burnin_rate=0.3, time_limit_seconds = __time_limit_seconds__,
-    max_na_iterations = 5, fixed_beta = TRUE, thinning = 10
+  postChain <- get_posterior(
+    data, model = "production", n_samples = 25e3, burnin = 10e3, thinning = 10
     )
   results[[sim]][['postChain']] <- postChain
-  # Save results.
-  saveRDS(results, output_file)
 }
 
+# Save results.
+saveRDS(results, output_file)
