@@ -1,6 +1,6 @@
 
-# Requirements ------------------------------------------------------------
 setwd('auto_apolo')
+# Requirements ------------------------------------------------------------
 rm(list = ls())
 set.seed(010101)
 
@@ -49,7 +49,7 @@ for (scenario in scenarios) {
   sims <- names(outputData[[scenario]])
   
   # Fix inverted sigmas in experiments.
-  sigmas <- get_real_sigmas(INPUT_DATA, scenario) %>% rev
+  sigmas <- get_real_sigmas(INPUT_DATA, scenario)
   Ts <- INPUT_DATA[[scenario]]$params$t
   n <- INPUT_DATA[[scenario]]$params$n
   theta <- list(n = n, t = Ts)
@@ -89,128 +89,7 @@ for (scenario in scenarios) {
 efficiency_abc %>% 
   saveRDS(
     sprintf(
-      "%s/rev_real_efficiency_abc_hf_%s.rds",
-      FOLDER_OUTPUT, Sys.Date()
-    )
-  )
-
-
-set.seed(010101)
-efficiency_abc <- list()
-# For each scenario.
-for (scenario in scenarios) {
-  # Read results.
-  outputData <- readRDS(sprintf("%s/BK_%s.RData", FOLDER_ABC, scenario))
-  
-  # Extract real betas and covariates.
-  X <- INPUT_DATA[['X']]
-  betas <- INPUT_DATA[[scenario]]$params$beta
-  # Extract simulations realized.
-  sims <- names(outputData[[scenario]])
-  
-  # Fix inverted sigmas in experiments.
-  sigmas <- get_real_sigmas(INPUT_DATA, scenario)
-  Ts <- INPUT_DATA[[scenario]]$params$t
-  n <- INPUT_DATA[[scenario]]$params$n
-  theta <- list(n = n, t = Ts)
-  
-  efficiency_abc[[scenario]] <- list()
-  
-  for (sim in sims) {
-    tic <- Sys.time()
-    message(scenario, sim)
-    y <- INPUT_DATA[[scenario]][[sim]]$y
-    est_ABCparams <- apply(outputData[[scenario]][[sim]]$ABCpostChain, 2, mean)
-    RegY <- lm(y ~ .,  data = data.frame(y, X[,2:3]))
-    SumStatY <- getSampleSumStats(theta = theta, y = y, X = X)
-    est_betas <- c(est_ABCparams[1], RegY$coefficients[-1])
-    est_sigmas <- get_abc_sigmas(outputData[[scenario]][[sim]]) %>% rev
-    PostDraws <- outputData[[scenario]][[sim]]$ABCpostChain
-    K <- dim(PostDraws)[1]
-    SumStatPar <- matrix(0, K, 5)
-    for (k in 1:K){
-      ResSim <- simRes(theta = theta, prior = PostDraws[k, 1:5])#, dist = "halfnormal")
-      SumStatPar[k, ] <- getSumStats(theta = theta, resS = ResSim)
-    }
-    
-    TI_real <- ColombiExpectation(n, Ts, y, X, betas, sigmas, p = 1)
-    TI_est <- ColombiExpectation(n, Ts, y, X, est_betas, est_sigmas, p = 1)
-    
-    ls0 <- list(
-      TE_real = t(sapply(TI_real, inv))[, 1:(Ts+1)],
-      TE_est = t(sapply(TI_est, inv))[, 1:(Ts+1)]
-    )
-    efficiency_abc[[scenario]][[sim]] <- ls0
-    print(Sys.time() - tic)
-  }
-}
-
-
-efficiency_abc %>% 
-  saveRDS(
-    sprintf(
-      "%s/rev_est_efficiency_abc_hf_%s.rds",
-      FOLDER_OUTPUT, Sys.Date()
-    )
-  )
-
-
-set.seed(010101)
-
-efficiency_abc <- list()
-# For each scenario.
-for (scenario in scenarios) {
-  # Read results.
-  outputData <- readRDS(sprintf("%s/BK_%s.RData", FOLDER_ABC, scenario))
-  
-  # Extract real betas and covariates.
-  X <- INPUT_DATA[['X']]
-  betas <- INPUT_DATA[[scenario]]$params$beta
-  # Extract simulations realized.
-  sims <- names(outputData[[scenario]])
-  
-  # Fix inverted sigmas in experiments.
-  sigmas <- get_real_sigmas(INPUT_DATA, scenario) %>% rev
-  Ts <- INPUT_DATA[[scenario]]$params$t
-  n <- INPUT_DATA[[scenario]]$params$n
-  theta <- list(n = n, t = Ts)
-  
-  efficiency_abc[[scenario]] <- list()
-  
-  for (sim in sims) {
-    tic <- Sys.time()
-    message(scenario, sim)
-    y <- INPUT_DATA[[scenario]][[sim]]$y
-    est_ABCparams <- apply(outputData[[scenario]][[sim]]$ABCpostChain, 2, mean)
-    RegY <- lm(y ~ .,  data = data.frame(y, X[,2:3]))
-    SumStatY <- getSampleSumStats(theta = theta, y = y, X = X)
-    est_betas <- c(est_ABCparams[1], RegY$coefficients[-1])
-    est_sigmas <- get_abc_sigmas(outputData[[scenario]][[sim]]) %>% rev
-    PostDraws <- outputData[[scenario]][[sim]]$ABCpostChain
-    K <- dim(PostDraws)[1]
-    SumStatPar <- matrix(0, K, 5)
-    for (k in 1:K){
-      ResSim <- simRes(theta = theta, prior = PostDraws[k, 1:5])#, dist = "halfnormal")
-      SumStatPar[k, ] <- getSumStats(theta = theta, resS = ResSim)
-    }
-    
-    TI_real <- ColombiExpectation(n, Ts, y, X, betas, sigmas, p = 1)
-    TI_est <- ColombiExpectation(n, Ts, y, X, est_betas, est_sigmas, p = 1)
-    
-    ls0 <- list(
-      TE_real = t(sapply(TI_real, inv))[, 1:(Ts+1)],
-      TE_est = t(sapply(TI_est, inv))[, 1:(Ts+1)]
-    )
-    efficiency_abc[[scenario]][[sim]] <- ls0
-    print(Sys.time() - tic)
-  }
-}
-
-
-efficiency_abc %>% 
-  saveRDS(
-    sprintf(
-      "%s/rev_both_efficiency_abc_hf_%s.rds",
+      "%s/efficiency_abc_hf_%s.rds",
       FOLDER_OUTPUT, Sys.Date()
     )
   )
@@ -281,7 +160,7 @@ scenarios <- stringr::str_extract(files, "s[0-9]+")
 # ABC: Metrics efficiency -------------------------------------------------
 
 outputData <- file.path(
-  FOLDER_OUTPUT, "rev_both_efficiency_abc_hf_2025-04-24.rds"
+  FOLDER_OUTPUT, "efficiency_abc_hf_2025-04-24.rds"
   ) %>% readRDS()
 scenarios <- names(outputData)
 df <- NULL
@@ -318,8 +197,7 @@ df %>%
 
 # Gibbs: Metrics efficiency ---------------------------------------------
 
-
-outputData <- file.path(FOLDER_OUTPUT, "efficiency_gibbs_hf_2025-04-23.rds") %>% 
+outputData <- file.path(FOLDER_OUTPUT, "efficiency_gibbs_hf_2025-04-24.rds") %>% 
   readRDS()
 scenarios <- names(outputData)
 
@@ -342,10 +220,21 @@ df %>%
   mutate(
     efficiency_type = str_split_i(metric_name, '_', -1L),
     metric_name = str_remove(metric_name, "_[^_]*$")
-  ) %>% relocate(scenario, efficiency_type, metric_name, metric_value) %>% 
+  ) %>% relocate(
+    scenario, efficiency_type, metric_name, metric_value_Gibbs = metric_value
+    ) %>% 
   fix_inverted_ids %>% 
   mutate(pp = str_extract(scenario, '\\d+') %>% as.integer) %>% 
   arrange(pp) %>% select(-pp) %>% 
+  left_join(
+    file.path(FOLDER_OUTPUT, "efficiency_metrics_abc_hf_2025-04-24.xlsx") %>% 
+      readxl::read_excel() %>% 
+      pivot_longer(
+        cols = starts_with('s'), 
+        names_to = 'scenario',
+        values_to = 'metric_value_abc'
+      )
+  ) %>% 
   writexl::write_xlsx(
     sprintf(
       "%s/efficiency_metrics_gibbs_hf_%s.xlsx",
@@ -355,7 +244,7 @@ df %>%
 
 # ABC + Gibbs: Sigmas -------------------------------------------------------------
 
-scenarios <- paste0('s', c(1, 14))
+scenarios <- paste0('s', c(1, 13, 14))
 
 files_gibbs <- list.files(FOLDER_GIBBS, full.names = T)
 files_abc <- list.files(FOLDER_ABC, full.names = T)
@@ -418,4 +307,44 @@ df %>%
       FOLDER_OUTPUT, Sys.Date()
     )
   )
+
+
+
+# Missing efficiencies. ---------------------------------------------------
+
+count_nas <- function(TE_estimates) {
+  sapply(
+    TE_estimates,
+    function(scenario) {
+      sapply(
+        scenario,
+        function(sim) {
+          sum(is.na(c(sim$TE_real + sim$TE_est)))
+        }
+      )
+    }
+  )
+}
+
+abc_hn_TE <- file.path(FOLDER_OUTPUT, "efficiency_abc_hf_2025-04-24.rds") %>% 
+  readRDS()
+
+gibbs_TE <- file.path(FOLDER_OUTPUT, "efficiency_gibbs_hf_2025-04-24.rds") %>% 
+  readRDS()
+
+scenarios <- paste0('s', 1:16)
+FOLDER_EXP_EFFICIENCIES <- '../../ABC4SFA/After/ABC4SFAv2/Data/Outputs/MH_final_este_si'
+files <- list.files(FOLDER_EXP_EFFICIENCIES, full.names = T)
+mh_exp_TE <- list()
+for (scenario in scenarios) {
+  file <- files[str_extract(files, 's\\d+') == scenario]
+  mh_exp_results <- readRDS(file)[[scenario]]
+  mh_exp_results$variances <- NULL
+  mh_exp_results$betas <- NULL
+  mh_exp_TE[[scenario]] <- mh_exp_results
+}
+
+(count_nas(abc_hn_TE) %>% apply(2, sum) / 300) %>% round(2)
+(count_nas(gibbs_TE) %>% apply(2, sum) / 300) %>% round(2)
+(count_nas(mh_exp_TE) %>% apply(2, sum) / 300) %>% round(2)
 

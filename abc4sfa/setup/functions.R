@@ -832,7 +832,7 @@ inv <- function(x){
 
 # Parser
 get_real_sigmas <- function(input_data, scenario) {
-  sigmas <- input_data[[scenario]]$params$sigma %>% rev
+  sigmas <- input_data[[scenario]]$params$sigma
   
   return(sigmas)
 }

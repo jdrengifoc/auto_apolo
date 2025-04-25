@@ -47,7 +47,7 @@ for (scenario in scenarios){
     colMeans(abs(est_sigmas / sigmas - 1)),
     colMeans((est_sigmas - sigmas)^2) %>% sqrt
   ) %>% as_tibble() %>% 
-    rename(sigma_u = 1, sigma_eta = 2, sigma_v = 3, sigma_alpha = 4) %>% 
+    rename(sigma_w = 1, sigma_eta = 2, sigma_v = 3, sigma_alpha = 4) %>% 
     mutate(
       scenario = scenario,
       type = c('Population', 'Estimate', 'Relative bias', 'RootMSE')

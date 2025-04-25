@@ -9,12 +9,11 @@ FOLDER_OUTPUT <- "abc4sfa/4_error_measurements/data/output/simulations/exp"
 dir.create(FOLDER_OUTPUT, recursive = T)
 
 
-# Metrics efficiency simulations exp --------------------------------------
-
 scenarios <- paste0('s', 1:16)
-
 FOLDER_EXP_EFFICIENCIES <- '../../ABC4SFA/After/ABC4SFAv2/Data/Outputs/MH_final_este_si'
 files <- list.files(FOLDER_EXP_EFFICIENCIES, full.names = T)
+
+# Metrics efficiency simulations exp --------------------------------------
 
 df <- NULL
 for (scenario in scenarios) {
@@ -49,3 +48,16 @@ df %>%
       FOLDER_OUTPUT, Sys.Date()
     )
   )
+
+
+# Count NAs ---------------------------------------------------------------
+
+mh_exp_TE <- list()
+for (scenario in scenarios) {
+  file <- files[str_extract(files, 's\\d+') == scenario]
+  mh_exp_results <- readRDS(file)[[scenario]]
+  mh_exp_results$variances <- NULL
+  mh_exp_results$betas <- NULL
+  mh_exp_TE[[scenario]] <- mh_exp_results
+}
+count_nas(mh_exp_TE) %>% apply(2, sum) / 300
