@@ -27,9 +27,3 @@ Loading required package: Matrix
 Loading required package: stats4
 Loading required package: gmm
 Loading required package: sandwich
-Error in gzfile(file, mode) : cannot open the connection
-Calls: saveRDS -> gzfile
-In addition: Warning message:
-In gzfile(file, mode) :
-  cannot open compressed file 'abc4sfa/3_gibbs_resources/output/Gibbs_hfn_usBanks_2025-04-23.RData', probable reason 'No such file or directory'
-Execution halted

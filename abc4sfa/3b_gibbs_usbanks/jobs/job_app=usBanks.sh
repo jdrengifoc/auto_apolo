@@ -9,10 +9,10 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mmanzurg@eafit.edu.co
 
-echo "Wed Apr 23 01:14:03 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0"
+echo "Thu Apr 24 00:10:59 -05 2025: Cargando módulo python/3.6.0_miniconda-4.3.11_gcc-11.2.0"
 module load python/3.6.0_miniconda-4.3.11_gcc-11.2.0
-echo "Wed Apr 23 01:14:03 -05 2025: activando venv abc4sfa"
+echo "Thu Apr 24 00:10:59 -05 2025: activando venv abc4sfa"
 source activate abc4sfa
 
-echo "Wed Apr 23 01:14:03 -05 2025: Ejecutando Rscript abc4sfa/3b_gibbs_usbanks//jobs/main_app=usBanks.R"
+echo "Thu Apr 24 00:10:59 -05 2025: Ejecutando Rscript abc4sfa/3b_gibbs_usbanks//jobs/main_app=usBanks.R"
 Rscript abc4sfa/3b_gibbs_usbanks//jobs/main_app=usBanks.R
