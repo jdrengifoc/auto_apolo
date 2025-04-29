@@ -6,7 +6,9 @@ setwd('auto_apolo/')
 library(dplyr)
 library(coda)
 library(stringr)
-
+library(tidyr)
+library(lubridate)
+library(ggplot2)
 
 theme4policies <- function(base_size = 16, base_family = "serif") {
   theme(
@@ -521,9 +523,62 @@ df %>%
     names_from = method,
     values_from = c(Mean, SD, Time.series.SE),
     names_glue = "{method}_{.value}"
-  ) %>% 
+  ) %>%
   writexl::write_xlsx(file.path(FOLDER_OUTPUT, 'table_apps_posteriors.xlsx'))
 
+
+# Mini add of Gibbs -------------------------------------------------------
+pp <- 'abc4sfa/3_gibbs_resources/output/Gibbs_hfn_usBanks_2025-04-24.RData' %>%
+  readRDS() %>% purrr::pluck('usBanks', 'postChain')
+
+pp <- 'abc4sfa/3_gibbs_resources/output/Gibbs_experiment_hn_s10_2025-04-24.RData' %>% 
+  readRDS() %>% purrr::pluck('sim1', 'postChain')
+pp$elapsed_time
+
+tibble(
+  sigma_w = pp$sigmau2chain,
+  sigma_eta = pp$sigmaeta2chain,
+  sigma_alpha = pp$sigmaalpha2chain,
+  sigma_epsilon = pp$sigmaepsilon2chain
+) %>% 
+  mutate(iteration = row_number()) %>% 
+  pivot_longer(
+    cols = starts_with('sigma_'),
+    names_to = 'type',
+    values_to = 'value'
+    ) %>% 
+  ggplot(aes(x = iteration, y = value)) +
+  geom_line() +
+  facet_wrap(~type, scales = 'free_y', nrow = 2L) +
+  theme4policies() +
+  labs(
+    x = 'Chain element',
+    y = 'Value'
+  )
+  
+ggsave(
+  file.path(FOLDER_OUTPUT, 'USBank_convegency.png'),
+  width = 10, height = 6)
+pp1 <- tibble(
+  sigma_w = pp$sigmau2chain,
+  sigma_eta = pp$sigmaeta2chain,
+  sigma_alpha = pp$sigmaalpha2chain,
+  sigma_epsilon = pp$sigmaepsilon2chain
+) %>% 
+  mutate(
+    across(starts_with('sigma_'), sqrt),
+    lambda = sigma_w / sigma_epsilon,
+    lambda_delta = sigma_eta / sigma_alpha,
+    Lambda = sigma_eta / sigma_w
+  ) %>% mcmc() %>% summary() %>% 
+  purrr::pluck('statistics')
+
+pp1
+
+  as_tibble(pp1, .name_repair = 'universal') %>% 
+    mutate(parameters = rownames(pp1)) %>% 
+    relocate(parameters) %>% select(-Naive.SE) %>% View
+    writexl::write_xlsx(file.path(FOLDER_OUTPUT, 'gibbs_usbanks.xlsx'))
 # OLD: Plot credible intervals ----------------------------------------------
 
 df_ci %>% 
